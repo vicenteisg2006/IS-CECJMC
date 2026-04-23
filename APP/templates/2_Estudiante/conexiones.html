@@ -1,0 +1,13 @@
+<!-- LLamada a Base + Nombre alumno -->
+{% extends "0_Bases/1base.html" %}
+{% load static %}
+{% block title %}{{ request.user.first_name }} {{ request.user.last_name }}{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-8 col-md-8 mb-4">
+            <h2>Conexiones</h2>
+            <p>Aquí puedes ver tus conexiones con otros estudiantes, empresas y profesores. Conecta con personas que compartan tus intereses y experiencias para ampliar tu red profesional.</p>
+        </div>
+    </div>
+{% endblock %}

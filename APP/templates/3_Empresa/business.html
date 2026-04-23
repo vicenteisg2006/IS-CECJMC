@@ -1,0 +1,30 @@
+<!-- LLamada a base -->
+{% extends '0_Bases/2base.html' %}
+{% load static %} 
+{% block title %}{{ request.user.first_name }}{% endblock %}
+
+<!-- Contenido específico de la empresa -->
+{% block content %}
+    <div class="row">
+
+        <!-- COLUMNA DE PUBLICACIONES -->
+        <div class="col-lg-8 col-md-12 mb-4">
+
+            <div class="card p-3 shadow-sm mb-4" style="border-radius: 15px;">
+                <form method="POST" action="{% url 'crear_post' %}" class="d-flex align-items-center w-100">
+            
+                    {% csrf_token %}
+                
+                    <input type="text" name="contenido_post" class="form-control rounded-pill me-2" placeholder="¡Comenta algún logro, experiencia o práctica!" required>
+                
+                    <button type="submit" class="btn btn-dark rounded-pill px-4">Publicar</button>
+            
+                </form>
+            </div>
+                
+            <!-- FUNCIONALIDAD DE PUBLICACIONES -->
+            {% include '0_Bases/feed.html' %}
+
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,13 @@
+<!-- LLamada a Base + Nombre alumno -->
+{% extends "0_Bases/1base.html" %}
+{% load static %}
+{% block title %}{{ request.user.first_name }} {{ request.user.last_name }}{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-8 col-md-8 mb-4">
+            <h2>Tareas</h2>
+            <p>Aquí puedes ver tus tareas asignadas por tus profesores. Mantente al día con tus responsabilidades académicas y organiza tu tiempo para cumplir con los plazos establecidos.</p>
+        </div>
+    </div>
+{% endblock %}

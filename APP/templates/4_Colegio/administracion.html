@@ -1,0 +1,10 @@
+<!-- Llamada a Base + Nombre colegio -->
+{% extends "0_Bases/3base.html" %}
+{% load static %}
+{% block title %}{{ request.user.first_name }} {{ request.user.last_name }}{% endblock %}
+
+
+<!-- Contenido específico Administrativo del colegio -->
+{% block content %}
+<p class="text-center mt-5">Bienvenido a la sección de administración del colegio, {{ request.user.first_name }}. Aquí podrás gestionar las actividades, estudiantes y empresas asociadas a tu institución.</p>
+{% endblock %}

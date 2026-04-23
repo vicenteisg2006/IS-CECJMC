@@ -1,0 +1,13 @@
+<!-- LLamada a Base  -->
+{% extends "0_Bases/2base.html" %}
+{% load static %}
+{% block title %}{{ request.user.first_name }}{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-8 col-md-8 mb-4">
+            <h2>Panel de Administración</h2>
+            <p>Aquí puedes gestionar las funciones y configuraciones de tu empresa.</p>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,13 @@
+<!-- LLamada a Base + Nombre alumno -->
+{% extends "0_Bases/1base.html" %}
+{% load static %}
+{% block title %}{{ request.user.first_name }} {{ request.user.last_name }}{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-8 col-md-8 mb-4">
+            <h2>Empresas</h2>
+            <p>Aquí puedes ver las empresas con las que tienes conexiones. Explora oportunidades de prácticas y empleo que se alineen con tus intereses y habilidades.</p>
+        </div>
+    </div>
+{% endblock %}

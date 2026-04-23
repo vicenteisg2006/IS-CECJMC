@@ -1,0 +1,87 @@
+{% extends 'core/base.html' %}
+{% block title %}- {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto pb-20 lg:pb-4 space-y-4">
+
+  <!-- Company Header -->
+  <div class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+    <div class="h-48 bg-gradient-to-r from-teal-600 to-cyan-600"></div>
+    <div class="p-6">
+      <div class="flex flex-col sm:flex-row items-start gap-4 -mt-20 sm:-mt-16">
+        <img src="{{ company.logo }}" alt="{{ company.name }}"
+          class="w-32 h-32 rounded-lg border-4 border-white object-cover shadow-lg"
+          onerror="this.src='https://ui-avatars.com/api/?name={{ company.name|urlencode }}&background=0d9488&color=fff&size=128'" />
+        <div class="flex-1 sm:mt-12">
+          <h1 class="text-3xl font-bold text-gray-900">{{ company.name }}</h1>
+          <p class="text-gray-700 mt-1">{{ company.industry }}</p>
+          {% if company.website %}
+          <a href="https://{{ company.website }}" target="_blank" rel="noopener noreferrer"
+            class="flex items-center gap-1 text-teal-700 hover:text-teal-800 mt-2 text-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            {{ company.website }}
+          </a>
+          {% endif %}
+        </div>
+        <button class="px-6 py-2 bg-teal-700 text-white rounded-full hover:bg-teal-800 transition-colors font-medium sm:mt-12 text-sm">Seguir</button>
+      </div>
+
+      <div class="flex flex-wrap gap-6 text-sm mt-6">
+        <div class="flex items-center gap-2 text-gray-600">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+          {{ company.location }}
+        </div>
+        <div class="flex items-center gap-2 text-gray-600">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16"/></svg>
+          {{ company.employees }} empleados
+        </div>
+        <div class="flex items-center gap-2 text-gray-600">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          {{ company.followers }} seguidores
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- About -->
+  <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+    <h2 class="text-xl font-semibold mb-3 text-gray-900">Acerca de</h2>
+    <p class="text-gray-700 leading-relaxed text-sm">{{ company.description }}</p>
+  </div>
+
+  <!-- Benefits -->
+  {% if company.benefits.all %}
+  <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+    <h2 class="text-xl font-semibold mb-4 text-gray-900">Beneficios para practicantes</h2>
+    <div class="grid sm:grid-cols-2 gap-3">
+      {% for benefit in company.benefits.all %}
+      <div class="flex items-start gap-3">
+        <div class="w-6 h-6 bg-teal-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+          <div class="w-2 h-2 bg-teal-700 rounded-full"></div>
+        </div>
+        <span class="text-gray-700 text-sm">{{ benefit.text }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Available Jobs -->
+  <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+    <div class="flex items-center gap-2 mb-4">
+      <svg class="w-5 h-5 text-teal-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      <h2 class="text-xl font-semibold text-gray-900">Prácticas disponibles ({{ company_jobs.count }})</h2>
+    </div>
+    {% if company_jobs %}
+    <div class="space-y-4">
+      {% for job in company_jobs %}
+      {% include 'core/_job_card.html' %}
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-gray-500 text-center py-8 text-sm">No hay prácticas disponibles en este momento</p>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
