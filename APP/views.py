@@ -56,7 +56,7 @@ def login(request):
             try:
                 tipo = user.tipo_perfil.tipo_perfil.lower() if user.tipo_perfil else ""
 
-                if tipo == "alumno":
+                if tipo == "alumno" or "estudiante":
                     return redirect("student")
 
                 elif tipo == "colegio":
