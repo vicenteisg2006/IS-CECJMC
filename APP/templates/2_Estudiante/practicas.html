@@ -10,4 +10,27 @@
             <p>Aquí puedes ver las prácticas profesionales disponibles. Explora oportunidades que se alineen con tus intereses y habilidades.</p>
         </div>
     </div>
+{% for oferta in tatata %}
+    <div class="card p-3 shadow-sm mb-3" style="border-radius: 15px;">
+        <div class="d-flex align-items-center mb-2">
+            <img src="{% static 'images/profilepic1.jpg' %}" class="rounded-circle me-2" style="width: 35px; height: 35px; object-fit: cover;">
+            <div>
+                <h6 class="mb-0 fw-bold">{{ tatata.empresa }}</h6>
+                <small class="text-muted">{{ oferta }}</small>
+            </div>
+        </div>
+        <p class="mb-2">{{ oferta }}</p>
+        <hr class="my-2">
+        <div class="d-flex justify-content-around">
+            <button class="btn btn-light btn-sm w-100 me-1" style="border-radius: 10px;">
+                <i class="bi bi-heart me-1"></i> {{ oferta }}
+            </button>
+            <button class="btn btn-light btn-sm w-100 ms-1" style="border-radius: 10px;">
+                <i class="bi bi-chat-right me-1"></i> {{ oferta}}
+            </button>
+        </div>
+    </div>
+{% empty %}
+    <p class="text-center text-muted">No hay publicaciones aún.</p>
+{% endfor %}
 {% endblock %}

@@ -121,7 +121,7 @@ def notificaciones_e(request):
     return render(request, "2_Estudiante/notificaciones.html")
 
 def practicas_e(request):
-    practicas = models.Practica.objects.all()
+    practicas = models.OfertaLaboral.objects.all()
     context = {'tatata':practicas}
     return render(request, "2_Estudiante/practicas.html", context)
 
