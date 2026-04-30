@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from .models import Usuario, Post
 import openpyxl
+import pandas as pd
 
 # ===========================================================
 #                                MEDIDAS DE SEGURIDAD
@@ -227,6 +228,28 @@ def dashboard(request):
 
 def administracion(request):
     return render(request, "4_Colegio/administracion.html")
+
+def moderacionPerfil(request):
+    return render(request, "4_Colegio/moderacionPerfil.html")
+
+def cargarPerfiles_excel(request):
+    if request.method == "POST" and request.FILES.get("archivo_excel"):
+        archivo = request.FILES["archivo_excel"]
+
+        try:
+            df = pd.read_excel(archivo)
+            for _, row in df.iterrows():
+                Usuario.objects.create(
+                    username=row['username'],
+                    nombre=row['nombre'],
+                    email=row['email'],
+                    tipo_perfil_id=row['tipo_perfil_id']
+                )
+            messages.success(request, "Perfiles cargados exitosamente.")
+        except Exception as e:
+            messages.error(request, f"Error al procesar el archivo: {str(e)}")
+        
+    return redirect('administracion')
 
 
 

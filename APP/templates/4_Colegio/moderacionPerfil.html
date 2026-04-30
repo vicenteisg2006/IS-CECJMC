@@ -1,0 +1,78 @@
+<!-- Llamada a Base + Nombre colegio -->
+{% extends "0_Bases/3base.html" %}
+{% load static %}
+{% block title %}{{ request.user.first_name }}{% endblock %}
+
+<!-- Contenido específico de Moderación de Perfiles -->
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8 col-md-8 mb-3">
+            <h2>Moderación de perfiles</h2>
+            <p>Aquí puedes gestionar (crear, editar y moderar) los perfiles dentro de la plataforma.</p>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Crear Perfil</h5>
+
+                    <!-- <p class="card-text text-muted small">a ver que imprime esto</p> -->
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="#" class="btn btn-outline-primary btn-sm">Formulario único</a>
+                        <a href="#" class="btn btn-outline-primary btn-sm">Cargar excel (masivo)</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-people-fill me-2"></i>Alumnos</h5>
+                    <p class="card-text text-muted small">Gestión de matrículas, edición de perfiles y carga masiva de notas.</p>
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="#" class="btn btn-outline-primary btn-sm">Agregar Alumno</a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm">Cargar Excel</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-success"><i class="bi bi-building me-2"></i>Empresas</h5>
+                    <p class="card-text text-muted small">Registrar nuevas empresas aliadas y gestionar convenios de práctica.</p>
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="#" class="btn btn-outline-success btn-sm">Nueva Empresa</a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm">Ver Listado</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-danger"><i class="bi bi-shield-lock-fill me-2"></i>Moderación</h5>
+                    <p class="card-text text-muted small">Supervisión de contenido en el muro y eliminación de publicaciones.</p>
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="#" class="btn btn-outline-danger btn-sm">Revisar Posts</a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm">Reportes</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
