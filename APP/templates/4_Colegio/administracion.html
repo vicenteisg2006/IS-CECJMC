@@ -1,10 +1,114 @@
 <!-- Llamada a Base + Nombre colegio -->
 {% extends "0_Bases/3base.html" %}
 {% load static %}
-{% block title %}{{ request.user.first_name }} {{ request.user.last_name }}{% endblock %}
+{% block title %}{{ request.user.first_name }}{% endblock %}
 
 
 <!-- Contenido específico Administrativo del colegio -->
 {% block content %}
-<p class="text-center mt-5">Bienvenido a la sección de administración del colegio, {{ request.user.first_name }}. Aquí podrás gestionar las actividades, estudiantes y empresas asociadas a tu institución.</p>
+
+
+<div class="container-fluid">
+    
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-gear me-2"></i>Moderación</h5>
+
+                    <p class="card-text text-muted small">a ver que imprime esto</p>
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="{% url 'moderacionPerfil' %}" class="btn btn-secondary btn-sm">Gestionar perfiles</a>
+                        <a href="#" class="btn btn-secondary btn-sm">Gestionar contenido</a>
+                        <a href="#" class="btn btn-secondary btn-sm">Ver Más</a>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+        <!-- </div>
+
+        <div class="row mb-4"> -->
+        <div class="col">
+
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-gear me-2"></i>Alumnos</h5>
+
+                    <p class="card-text text-muted small">a ver que imprime esto</p>
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="#" class="btn btn-secondary btn-sm">Gestionar alumnos</a>
+                        <a href="#" class="btn btn-secondary btn-sm">Acción 2</a>
+                        <a href="#" class="btn btn-secondary btn-sm">Ver Más</a>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-gear me-2"></i>Empresas</h5>
+
+                    <p class="card-text text-muted small">a ver que imprime esto</p>
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="#" class="btn btn-secondary btn-sm">Acción 1</a>
+                        <a href="#" class="btn btn-secondary btn-sm">Acción 2</a>
+                        <a href="#" class="btn btn-secondary btn-sm">Ver Más</a>
+                    </div>
+                    
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-gear me-2"></i>Funciones área administrativa 4</h5>
+
+                    <p class="card-text text-muted small">a ver que imprime esto</p>
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="#" class="btn btn-secondary btn-sm">Acción 1</a>
+                        <a href="#" class="btn btn-secondary btn-sm">Acción 2</a>
+                        <a href="#" class="btn btn-secondary btn-sm">Ver Más</a>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col">
+
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-gear me-2"></i>Funciones área administrativa 5</h5>
+
+                    <p class="card-text text-muted small">a ver que imprime esto</p>
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="#" class="btn btn-secondary btn-sm">Acción 1</a>
+                        <a href="#" class="btn btn-secondary btn-sm">Acción 2</a>
+                        <a href="#" class="btn btn-secondary btn-sm">Ver Más</a>
+                    </div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+</div>
 {% endblock %}

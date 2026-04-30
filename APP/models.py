@@ -32,6 +32,8 @@ class Slep(models.Model):
     def __str__(self):
         return self.nombre
 
+#
+
 class CentroEducacional(models.Model):
     slep = models.ForeignKey(Slep, on_delete=models.SET_NULL, null=True)
     nombre = models.CharField(max_length=200)

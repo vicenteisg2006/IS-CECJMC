@@ -17,8 +17,9 @@ urlpatterns = [
 
 
     #Vistas Colegio
-    path('administracion/', views.administracion, name='administracion'), #administracion
     path('school/', views.school, name='school'), #school
+    path('administracion/', views.administracion, name='administracion'), #administracion
+    path('moderacion-perfil/', views.moderacionPerfil, name='moderacionPerfil'), #moderacionPerfil
 
     #Vistas Empresa
     path('business/', views.business, name='business'), #business
