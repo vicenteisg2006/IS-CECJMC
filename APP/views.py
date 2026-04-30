@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from .models import Usuario, Post
+from . import models
 import openpyxl
 import pandas as pd
 
@@ -14,7 +14,7 @@ import pandas as pd
 
 @login_required(login_url='/') 
 def student(request):
-    post = Post.objects.all().order_by('-fecha_publicacion').select_related('usuario')
+    post = models.Post.objects.all().order_by('-fecha_publicacion').select_related('usuario')
     return render(request, "2_Estudiante/student.html", 
                   {
                     "posts": post
@@ -22,7 +22,7 @@ def student(request):
 
 @login_required(login_url='/')
 def school(request):
-    post = Post.objects.all().order_by('-fecha_publicacion').select_related('usuario')
+    post = models.Post.objects.all().order_by('-fecha_publicacion').select_related('usuario')
     return render(request, "4_Colegio/school.html", 
                   {
                     "posts": post
@@ -30,7 +30,7 @@ def school(request):
 
 @login_required(login_url='/')
 def business(request):
-    post = Post.objects.all().order_by('-fecha_publicacion').select_related('usuario')
+    post = models.Post.objects.all().order_by('-fecha_publicacion').select_related('usuario')
     return render(request, "3_Empresa/business.html", 
                   {
                     "posts": post
@@ -121,7 +121,9 @@ def notificaciones_e(request):
     return render(request, "2_Estudiante/notificaciones.html")
 
 def practicas_e(request):
-    return render(request, "2_Estudiante/practicas.html")
+    practicas = models.Practica.objects.all()
+    context = {'tatata':practicas}
+    return render(request, "2_Estudiante/practicas.html", context)
 
 def empresas_e(request):
     return render(request, "2_Estudiante/empresas.html")
@@ -239,7 +241,7 @@ def cargarPerfiles_excel(request):
         try:
             df = pd.read_excel(archivo)
             for _, row in df.iterrows():
-                Usuario.objects.create(
+                models.Usuario.objects.create(
                     username=row['username'],
                     nombre=row['nombre'],
                     email=row['email'],
@@ -342,7 +344,7 @@ def crear_post(request):
         texto = request.POST.get("contenido_post", "").strip()
 
         if texto:
-            Post.objects.create(
+            models.Post.objects.create(
                 usuario=request.user, 
                 mensaje=texto
                 )
