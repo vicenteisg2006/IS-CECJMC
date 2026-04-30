@@ -82,11 +82,11 @@ class Usuario(AbstractUser):
     centro_educacional = models.ForeignKey(CentroEducacional, on_delete=models.SET_NULL, blank=True, null=True)
     competencias = models.ManyToManyField(Competencia, related_name='usuarios_competencia', blank=True)
 
-    #Vista mas ordenada para el admin
+    # Vista mas ordenada para el admin
     def __str__(self):
         tipoo = self.tipo_perfil.tipo_perfil.lower() if self.tipo_perfil else "Desconocido"
 
-        if tipoo == "alumno":
+        if tipoo == "estudiante" or tipoo == "alumno":
             return f"{self.tipo_perfil} - {self.centro_educacional} - {self.first_name} {self.last_name}"
         
         elif tipoo == "colegio":
@@ -98,10 +98,6 @@ class Usuario(AbstractUser):
         else:
             return f"Super Admin - {self.username}"
         
-
-
-
-
 
 # entidades
 
