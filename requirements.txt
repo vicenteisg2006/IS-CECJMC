@@ -1,5 +1,6 @@
 asgiref==3.11.1
 Django==6.0.3
+django-debug-toolbar==6.3.0
 django-jazzmin==3.0.4
 et_xmlfile==2.0.0
 git-filter-repo==2.47.0
