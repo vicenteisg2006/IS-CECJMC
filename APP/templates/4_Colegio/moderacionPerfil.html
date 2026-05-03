@@ -33,7 +33,7 @@
 
                     <div class="collapse" id="collapseExcel1">
                         <div class="card card-body border-0 bg-light mt-3">
-                            <form action="{% url 'cargarPerfiles_excel' %}" method="POST" enctype="multipart/form-data">
+                            <form action="{% url 'cargarPerfilesEstudiantes_excel' %}" method="POST" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <div class="mb-3">
                                     <label for="archivo_excel" class="form-label small fw-bold">Selecciona el archivo .xlsx para subir perfiles de tipo estudiante</label>
@@ -50,7 +50,7 @@
 
                     <div class="collapse" id="collapseExcel2">
                         <div class="card card-body border-0 bg-light mt-3">
-                            <form action="{% url 'cargarPerfiles_excel' %}" method="POST" enctype="multipart/form-data">
+                            <form action="{% url 'cargarPerfilesEmpresas_excel' %}" method="POST" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <div class="mb-3">
                                     <label for="archivo_excel" class="form-label small fw-bold">Selecciona el archivo .xlsx para subir perfiles de tipo empresa</label>

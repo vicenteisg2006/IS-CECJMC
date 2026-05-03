@@ -236,24 +236,63 @@ def administracion(request):
 def moderacionPerfil(request):
     return render(request, "4_Colegio/moderacionPerfil.html")
 
-def cargarPerfiles_excel(request):
+def cargar_estudiantes_excel(request):
     if request.method == "POST" and request.FILES.get("archivo_excel"):
         archivo = request.FILES["archivo_excel"]
         try:
             df = pd.read_excel(archivo)
+
+            perfil_estudiante = models.TipoPerfil.objects.get(tipo_perfil__iexact='ESTUDIANTE')
+            
             for _, row in df.iterrows():
 
-                models.Usuario.objects.create(
-                    username=row['username'],
-                    nombre=row['nombre'],
-                    email=row['email'],
-                    tipo_perfil_id=row['tipo_perfil_id']
+                user = models.Usuario.objects.create_user(
+                    username=str(row['USUARIO']),
+                    email=row['EMAIL'],
+                    password=str(row['CONTRASEÑA']), 
+                    first_name=row['NOMBRE'],
+                    last_name=row['APELLIDO']
                 )
-            messages.success(request, "¡Perfiles cargados exitosamente!")
+
+                user.tipo_perfil = perfil_estudiante
+                user.curso = row['CURSO']
+                user.fecha_nacimiento = row['FECHA_NACIMIENTO']
+                
+
+                colegio = models.CentroEducacional.objects.get(nombre=row['CENTRO_EDUCACIONAL'])
+                user.centro_educacional = colegio
+                
+                user.save()
+                
+            messages.success(request, f"Se cargaron {len(df)} estudiantes correctamente.")
         except Exception as e:
-            messages.error(request, f"Error: {str(e)}")
-    
-    return redirect('administracion')
+            messages.error(request, f"Error en carga de estudiantes: {str(e)}")
+            
+    return redirect('moderacionPerfil')
+
+def cargar_empresas_excel(request):
+    if request.method == "POST" and request.FILES.get("archivo_excel"):
+        archivo = request.FILES["archivo_excel"]
+        try:
+            df = pd.read_excel(archivo)
+            perfil_empresa = models.TipoPerfil.objects.get(tipo_perfil__iexact='EMPRESA')
+            
+            for _, row in df.iterrows():
+                user = models.Usuario.objects.create_user(
+                    username=str(row['USUARIO']),
+                    email=row['EMAIL'],
+                    password=str(row['CONTRASEÑA']),
+                    first_name=row['NOMBRE'] # Para empresas solo usamos el primer nombre
+                )
+                user.tipo_perfil = perfil_empresa
+                # Aquí no asignamos curso ni colegio según tu lógica de empresas
+                user.save()
+                
+            messages.success(request, f"Se cargaron {len(df)} empresas correctamente.")
+        except Exception as e:
+            messages.error(request, f"Error en carga de empresas: {str(e)}")
+            
+    return redirect('moderacionPerfil')
 
 
 
