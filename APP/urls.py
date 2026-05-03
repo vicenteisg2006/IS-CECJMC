@@ -21,6 +21,7 @@ urlpatterns = [
     path('school/', views.school, name='school'), #school
     path('administracion/', views.administracion, name='administracion'), #administracion
     path('moderacion-perfil/', views.moderacionPerfil, name='moderacionPerfil'), #moderacionPerfil
+    path('cargar-excel/', views.cargarPerfiles_excel, name='cargarPerfiles_excel'), #cargar perfiles con excel
 
     #Vistas Empresa
     path('business/', views.business, name='business'), #business

@@ -16,14 +16,53 @@
     
     <div class="row mb-4">
         <div class="col">
-            <div class="card h-100">
+            <div class="card h-100 shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title">Crear Perfil</h5>
+                    <h5 class="card-title"><i class="bi bi-person-plus-fill me-2"></i>Crear Perfil</h5>
 
-                    <!-- <p class="card-text text-muted small">a ver que imprime esto</p> -->
                     <div class="d-grid gap-2 mt-3">
-                        <a href="#" class="btn btn-outline-primary btn-sm">Formulario único</a>
-                        <a href="#" class="btn btn-outline-primary btn-sm">Cargar excel (masivo)</a>
+                        <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExcel1" aria-expanded="false" aria-controls="collapseExcel1">
+                            Cargar excel (Estudiantes)
+                        </button>
+
+                        <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExcel2" aria-expanded="false" aria-controls="collapseExcel2">
+                            Cargar excel (Empresas)
+                        </button>
+
+                    </div>
+
+                    <div class="collapse" id="collapseExcel1">
+                        <div class="card card-body border-0 bg-light mt-3">
+                            <form action="{% url 'cargarPerfiles_excel' %}" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="archivo_excel" class="form-label small fw-bold">Selecciona el archivo .xlsx para subir perfiles de tipo estudiante</label>
+                                    <input type="file" name="archivo_excel" class="form-control form-control-sm" accept=".xlsx, .xls" required>
+                                </div>
+                                <div class="d-flex justify-content-end gap-2">
+                                    <!-- Botón para cancelar/cerrar -->
+                                    <button type="button" class="btn btn-light btn-sm" data-bs-toggle="collapse" data-bs-target="#collapseExcel1">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary btn-sm px-4">Subir Archivo</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="collapse" id="collapseExcel2">
+                        <div class="card card-body border-0 bg-light mt-3">
+                            <form action="{% url 'cargarPerfiles_excel' %}" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="archivo_excel" class="form-label small fw-bold">Selecciona el archivo .xlsx para subir perfiles de tipo empresa</label>
+                                    <input type="file" name="archivo_excel" class="form-control form-control-sm" accept=".xlsx, .xls" required>
+                                </div>
+                                <div class="d-flex justify-content-end gap-2">
+                                    <!-- Botón para cancelar/cerrar -->
+                                    <button type="button" class="btn btn-light btn-sm" data-bs-toggle="collapse" data-bs-target="#collapseExcel2">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary btn-sm px-4">Subir Archivo</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
 
                 </div>

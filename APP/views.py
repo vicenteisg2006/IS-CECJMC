@@ -1,3 +1,5 @@
+from urllib import request
+
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -237,20 +239,20 @@ def moderacionPerfil(request):
 def cargarPerfiles_excel(request):
     if request.method == "POST" and request.FILES.get("archivo_excel"):
         archivo = request.FILES["archivo_excel"]
-
         try:
             df = pd.read_excel(archivo)
             for _, row in df.iterrows():
+
                 models.Usuario.objects.create(
                     username=row['username'],
                     nombre=row['nombre'],
                     email=row['email'],
                     tipo_perfil_id=row['tipo_perfil_id']
                 )
-            messages.success(request, "Perfiles cargados exitosamente.")
+            messages.success(request, "¡Perfiles cargados exitosamente!")
         except Exception as e:
-            messages.error(request, f"Error al procesar el archivo: {str(e)}")
-        
+            messages.error(request, f"Error: {str(e)}")
+    
     return redirect('administracion')
 
 
