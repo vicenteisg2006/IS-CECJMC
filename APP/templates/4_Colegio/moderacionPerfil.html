@@ -36,7 +36,12 @@
                             <form action="{% url 'cargarPerfilesEstudiantes_excel' %}" method="POST" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <div class="mb-3">
-                                    <label for="archivo_excel" class="form-label small fw-bold">Selecciona el archivo .xlsx para subir perfiles de tipo estudiante</label>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label for="archivo_excel" class="form-label small fw-bold mb-0">Selecciona el archivo .xlsx para subir perfiles de tipo estudiante</label>
+                                        <a href="{% static 'archivos/Plantila Referencia Estudiantes.xlsx' %}" class="btn btn-link btn-sm text-decoration-none" download>
+                                            <i class="bi bi-download me-1"></i> Descargar plantilla estudiante
+                                        </a>
+                                    </div>
                                     <input type="file" name="archivo_excel" class="form-control form-control-sm" accept=".xlsx, .xls" required>
                                 </div>
                                 <div class="d-flex justify-content-end gap-2">
@@ -53,7 +58,12 @@
                             <form action="{% url 'cargarPerfilesEmpresas_excel' %}" method="POST" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <div class="mb-3">
-                                    <label for="archivo_excel" class="form-label small fw-bold">Selecciona el archivo .xlsx para subir perfiles de tipo empresa</label>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label for="archivo_excel" class="form-label small fw-bold mb-0">Selecciona el archivo .xlsx para subir perfiles de tipo empresa</label>
+                                        <a href="{% static 'archivos/Plantilla Referencia Empresas.xlsx' %}" class="btn btn-link btn-sm text-decoration-none" download>
+                                            <i class="bi bi-download me-1"></i> Descargar plantilla empresa
+                                        </a>
+                                    </div>
                                     <input type="file" name="archivo_excel" class="form-control form-control-sm" accept=".xlsx, .xls" required>
                                 </div>
                                 <div class="d-flex justify-content-end gap-2">
