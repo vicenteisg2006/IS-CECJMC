@@ -76,6 +76,12 @@ class Usuario(AbstractUser):
     avatar_url = models.URLField(max_length=500, blank=True) # Ideal para Cloudflare
     bio = models.TextField(blank=True)
     curso = models.CharField(max_length=100, blank=True)
+
+    @property
+    def get_avatar(self):
+        if self.avatar_url:
+            return self.avatar_url
+        return '/static/images/profilepic1.jpg'
     
     # Llaves Foráneas (Foreign Keys)
     tipo_perfil = models.ForeignKey(TipoPerfil, on_delete=models.SET_NULL, null=True)

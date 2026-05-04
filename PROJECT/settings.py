@@ -14,6 +14,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
 
+CLOUDFLARE_ACCOUNT_ID = os.getenv('CLOUDFLARE_ACCOUNT_ID')
+CLOUDFLARE_API_TOKEN = os.getenv('CLOUDFLARE_API_TOKEN')
+CLOUDFLARE_ACCOUNT_HASH = os.getenv('CLOUDFLARE_ACCOUNT_HASH')
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

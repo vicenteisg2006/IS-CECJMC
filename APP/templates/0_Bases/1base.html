@@ -44,7 +44,7 @@
                             data-bs-toggle="dropdown"
                             aria-expanded="false">
 
-                            <img src="{% static 'images/profilepic1.jpg' %}" alt="Profile" class="rounded-circle fotito1-navbar">
+                            <img src="{{ request.user.get_avatar }}" alt="Profile" class="rounded-circle fotito1-navbar">
                         </a>
 
                         <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="menusitoPerfilsito" style="border-radius: 12px; margin-top: 10px;">
@@ -86,7 +86,7 @@
                         <div class="card p-3 shadow-sm" style="border-radius: 15px;">
                             <div class="d-flex align-items-center">
 
-                                <img src="{% static 'images/profilepic1.jpg' %}" alt="Perfil" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                <img src="{{ request.user.get_avatar }}" alt="Perfil" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;">
                                 
                                 <div class="d-flex flex-column">
                                     <h6 class="mb-0 fw-bold"> {{ request.user.first_name }} {{ request.user.last_name }} </h6>

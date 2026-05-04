@@ -2,7 +2,7 @@
 {% for post in posts %}
     <div class="card p-3 shadow-sm mb-3" style="border-radius: 15px;">
         <div class="d-flex align-items-center mb-2">
-            <img src="{% static 'images/profilepic1.jpg' %}" class="rounded-circle me-2" style="width: 35px; height: 35px; object-fit: cover;">
+            <img src="{{ post.usuario.get_avatar }}" class="rounded-circle me-2" style="width: 35px; height: 35px; object-fit: cover;">
             <div>
                 <h6 class="mb-0 fw-bold">{{ post.usuario.get_full_name|default:post.usuario.username }}</h6>
                 <small class="text-muted">{{ post.fecha_publicacion|date:"d M, Y - H:i" }}</small>
