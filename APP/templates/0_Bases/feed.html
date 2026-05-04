@@ -11,8 +11,11 @@
         <p class="mb-2">{{ post.mensaje }}</p>
         <hr class="my-2">
         <div class="d-flex justify-content-around">
-            <button class="btn btn-light btn-sm w-100 me-1" style="border-radius: 10px;">
-                <i class="bi bi-heart me-1"></i> {{ post.likes.count }}
+            <button class="btn btn-light btn-sm w-100 me-1 btn-like" 
+                    data-id="{{ post.id }}" 
+                    style="border-radius: 10px;">
+                <i class="bi {% if request.user in post.likes.all %}bi-heart-fill text-danger{% else %}bi-heart{% endif %} me-1"></i> 
+                <span class="like-count">{{ post.likes.count }}</span>
             </button>
             <button class="btn btn-light btn-sm w-100 ms-1" style="border-radius: 10px;">
                 <i class="bi bi-chat-left me-1"></i> {{ post.comentarios.count }}
@@ -22,3 +25,29 @@
 {% empty %}
     <p class="text-center text-muted">No hay publicaciones aún.</p>
 {% endfor %}
+
+<script>
+    document.querySelectorAll('.btn-like').forEach(button => {
+        button.addEventListener('click', function() {
+            const postId = this.dataset.id;
+            const icon = this.querySelector('i');
+            const countSpan = this.querySelector('.like-count');
+
+            fetch(`/like/${postId}/`, {
+                method: 'GET',
+                headers: {'X-Requested-With': 'XMLHttpRequest'}
+            })
+            .then(response => response.json())
+            .then(data => {
+                countSpan.innerText = data.count;
+                if (data.liked) {
+                    icon.classList.replace('bi-heart', 'bi-heart-fill');
+                    icon.classList.add('text-danger');
+                } else {
+                    icon.classList.replace('bi-heart-fill', 'bi-heart');
+                    icon.classList.remove('text-danger');
+                }
+            });
+        });
+    });
+</script>

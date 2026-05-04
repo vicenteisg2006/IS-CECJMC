@@ -31,6 +31,7 @@ urlpatterns = [
 
     #Funciones generales
     path('post/', views.crear_post, name='crear_post'),
+    path('like/<int:post_id>/', views.toggle_like, name='toggle_like'),
 
 
     path('testalert/', views.testalert, name='testalert')

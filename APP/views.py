@@ -396,3 +396,22 @@ def crear_post(request):
     
     url_anterior = request.META.get('HTTP_REFERER', '/')
     return redirect(url_anterior)
+
+@login_required
+def toggle_like(request, post_id):
+    post = get_object_or_404(models.Post, id=post_id)
+    # Buscamos si ya existe el Like
+    like_qs = models.Like.objects.filter(usuario=request.user, post=post)
+    
+    if like_qs.exists():
+        like_qs.delete()
+        liked = False
+    else:
+        models.Like.objects.create(usuario=request.user, post=post)
+        liked = True    
+    
+    # Devolvemos el nuevo conteo de likes para actualizar el HTML
+    return JsonResponse({
+        'liked': liked,
+        'count': post.likes.count()
+    })
