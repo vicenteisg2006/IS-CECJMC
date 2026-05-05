@@ -1,74 +1,126 @@
-{% extends "0_Bases/1base.html" %}
+<!-- Pagina de Perfil -->
+
 {% load static %}
 
-{% block title %}Mi Perfil - REL+{% endblock %}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Mi Perfil - REL+{% endblock %}</title>
 
-{% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm" style="border-radius: 15px;">
-                <div class="card-header bg-white border-0 pt-4">
-                    <h3 class="fw-bold text-center">Configuración de Perfil</h3>
+        <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+        <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    </head>
+
+    <body>
+        <nav class="navbar navbar-dark sticky-top py-1" style="background-color: #000000; min-height: 60px;">
+            <div class="container-fluid d-flex align-items-center justify-content-between flex-nowrap">
+
+                <!-- Titulito -->
+                <div style="width: 100px;", class="d-none d-sm-block">
+                    <span class="navbar-brand mb-0 titulito1-navbar">REL+</span>
                 </div>
-                <div class="card-body px-4 pb-4">
-                    
-                    <!-- Formulario de Actualización -->
-                    <form action="{% url 'actualizar_perfil' %}" method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        
-                        <!-- Sección de Foto -->
-                        <div class="text-center mb-4">
-                            <div class="position-relative d-inline-block">
-                                <img src="{{ user.get_avatar }}" alt="Avatar" id="preview" class="rounded-circle border" 
-                                     style="width: 150px; height: 150px; object-fit: cover;">
-                                <label for="foto-input" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2" style="cursor: pointer;">
-                                    <i class="bi bi-camera-fill"></i>
-                                </label>
-                                <input type="file" id="foto-input" name="nueva_foto" class="d-none" accept="image/*">
-                            </div>
-                            <p class="small text-muted mt-2">Haz clic en la cámara para cambiar tu foto</p>
-                        </div>
 
-                        <hr class="my-4">
+                <!-- Barra de Busqueda-->
+                <form class="d-flex flex-grow-1 form-control-lg m-0" role="search" style="max-width: 800px; width: 100%;">
+                    <div class="input-group d-flex w-100">
+                        <input class="form-control" type="search" placeholder="Buscar" aria-label="Buscar" style="border-radius: 20px 0 0 20px;">
+                        <button class="btn btn-outline-light" type="submit" style="border-radius: 0 20px 20px 0;">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
 
-                        <!-- Datos Personales -->
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Nombre</label>
-                                <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Apellido</label>
-                                <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label fw-bold small">Centro Educacional</label>
-                                <input type="text" class="form-control bg-light" value="{{ user.centro_educacional.nombre }}" readonly>
-                                <div class="form-text">El centro educacional no puede ser cambiado por el alumno.</div>
-                            </div>
-                        </div>
+                <!-- Icono perfil -->
+                <div style="width: 100px;" class="d-flex justify-content-end">
+                    <div class="dropdown">
 
-                        <div class="d-grid gap-2 mt-5">
-                            <button type="submit" class="btn btn-primary fw-bold" style="border-radius: 10px;">
-                                Guardar Cambios
-                            </button>
-                            <a href="{% url 'student' %}" class="btn btn-outline-secondary btn-sm border-0">Cancelar</a>
-                        </div>
-                    </form>
+                        <a href="#" class="d-flex align-items-center text-decoration-none text-light"
+                            id="menusitoPerfilsito"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+
+                            <img src="{{ request.user.get_avatar }}" alt="Profile" class="rounded-circle fotito1-navbar">
+                        </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="menusitoPerfilsito" style="border-radius: 12px; margin-top: 10px;">
+                            <li><h6 class="dropdown-header fw-bold">Mi Cuenta<h6></li>
+                            <li><a class="dropdown-item" href="{% url 'ver_perfil' %}"><i class="bi bi-person me-2"></i>Perfil</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear-fill me-2"></i>Configuración</a></li>
+                            
+                            <li><hr class="d-lg-none" class="dropdown-divider"></li>
+
+                            <li><h6 class="dropdown-header fw-bold d-lg-none">Tablero</h6></li>
+
+                            <li class="d-lg-none"><a class="dropdown-item" href="{% url 'student' %}"><i class="bi bi-house-door me-2"></i>Home</a></li>
+                            <li class="d-lg-none"><a class="dropdown-item" href="{% url 'notificaciones_e' %}"><i class="bi bi-bell me-2"></i>Notificaciones</a></li>
+                            <li class="d-lg-none"><a class="dropdown-item" href="{% url 'practicas_e' %}"><i class="bi bi-pencil me-2"></i> Prácticas</a></li>
+                            <li class="d-lg-none"><a class="dropdown-item" href="{% url 'empresas_e' %}"><i class="bi bi-building me-2"></i> Empresas</a></li>
+                            <li class="d-lg-none"><a class="dropdown-item" href="{% url 'tareas_e' %}"><i class="bi bi-book me-2"></i> Tareas</a></li>
+                            <li class="d-lg-none"><a class="dropdown-item" href="{% url 'conexiones_e' %}"><i class="bi bi-people me-2"></i> Conexiones</a></li>
+
+                            <li><hr class="d-lg-none" class="dropdown-divider"></li>
+
+                            <li class="d-lg-none"><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="bi bi-door-open me-2"></i> Cerrar Sesión</a></li>
+
+                        </ul>
+
+                    </div>
                 </div>
+
             </div>
-        </div>
-    </div>
-</div>
+        </nav>
 
-<!-- Script para previsualizar la foto antes de subirla -->
-<script>
-    document.getElementById('foto-input').onchange = evt => {
-        const [file] = document.getElementById('foto-input').files
-        if (file) {
-            document.getElementById('preview').src = URL.createObjectURL(file)
-        }
-    }
-</script>
-{% endblock %}
+        <!---->
+
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
