@@ -71,12 +71,13 @@ class Competencia(models.Model):
 
 class Usuario(AbstractUser):
     fecha_nacimiento = models.DateField(null=True, blank=True)
-    telefono = models.CharField(max_length=20, blank=True)
-    direccion = models.CharField(max_length=255, blank=True)
+    telefono = models.CharField(max_length=20, blank=True, null=True)
+    direccion = models.CharField(max_length=255, blank=True, null=True)
+    email = models.EmailField(max_length=255, blank=True, null=True)
     # avatar_url = models.URLField(max_length=500, blank=True) # Ideal para Cloudflare
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
-    bio = models.TextField(blank=True)
-    curso = models.CharField(max_length=100, blank=True)
+    bio = models.TextField(blank=True, null=True)
+    curso = models.CharField(max_length=100, blank=True, null=True)
 
     @property
     def get_avatar(self):

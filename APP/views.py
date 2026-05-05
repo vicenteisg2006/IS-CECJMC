@@ -425,14 +425,18 @@ def actualizar_perfil(request):
     if request.method == 'POST':
         user = request.user
         
+        user.first_name = request.POST.get('first_name')
+        user.telefono = request.POST.get('telefono')
+        user.direccion = request.POST.get('direccion')
+
         nueva_foto = request.FILES.get('nueva_foto')
         if nueva_foto:
             user.avatar = nueva_foto 
-            
-        user.first_name = request.POST.get('first_name')
-        user.last_name = request.POST.get('last_name')
+
+        nuevo_apellido = request.POST.get('last_name')
+        if nuevo_apellido is not None:
+            user.last_name = nuevo_apellido
         
         user.save()
-        messages.success(request, "¡Información actualizada!")
-        
+        messages.success(request, "Perfil actualizado.")
     return redirect('ver_perfil')

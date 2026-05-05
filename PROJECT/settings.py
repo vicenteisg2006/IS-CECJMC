@@ -157,3 +157,5 @@ JAZZMIN_SETTINGS = {
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'APP', 'media')
 MEDIA_URL = '/media/'
+
+LOGIN_URL = 'login'

@@ -50,17 +50,6 @@
                             <li><h6 class="dropdown-header fw-bold">Mi Cuenta<h6></li>
                             <li><a class="dropdown-item" href="{% url 'ver_perfil' %}"><i class="bi bi-person me-2"></i>Perfil</a></li>
                             <li><a class="dropdown-item" href="#"><i class="bi bi-gear-fill me-2"></i>Configuración</a></li>
-                            
-                            <li><hr class="d-lg-none" class="dropdown-divider"></li>
-
-                            <li><h6 class="dropdown-header fw-bold d-lg-none">Tablero</h6></li>
-
-                            <li class="d-lg-none"><a class="dropdown-item" href="{% url 'student' %}"><i class="bi bi-house-door me-2"></i>Home</a></li>
-                            <li class="d-lg-none"><a class="dropdown-item" href="{% url 'notificaciones_e' %}"><i class="bi bi-bell me-2"></i>Notificaciones</a></li>
-                            <li class="d-lg-none"><a class="dropdown-item" href="{% url 'practicas_e' %}"><i class="bi bi-pencil me-2"></i> Prácticas</a></li>
-                            <li class="d-lg-none"><a class="dropdown-item" href="{% url 'empresas_e' %}"><i class="bi bi-building me-2"></i> Empresas</a></li>
-                            <li class="d-lg-none"><a class="dropdown-item" href="{% url 'tareas_e' %}"><i class="bi bi-book me-2"></i> Tareas</a></li>
-                            <li class="d-lg-none"><a class="dropdown-item" href="{% url 'conexiones_e' %}"><i class="bi bi-people me-2"></i> Conexiones</a></li>
 
                             <li><hr class="d-lg-none" class="dropdown-divider"></li>
 
@@ -74,8 +63,110 @@
             </div>
         </nav>
 
-        <!---->
+    <!---->
+        <div class="container py-4">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card shadow-sm" style="border-radius: 15px;">
+                        <div class="card-header  border-0 pt-4">
+                            <h3 class="fw-bold text-center">Tu Perfil</h3>
+                        </div>
+                        <div class="card-body px-4 pb-4">
+                            
+                            <!-- Formulario de Actualización Genérico -->
+                            <form action="{% url 'actualizar_perfil' %}" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                
+                                <!-- Sección de Foto (Común para todos) -->
+                                <div class="text-center mb-4">
+                                    <div class="position-relative d-inline-block">
+                                        <img src="{{ user.get_avatar }}" alt="Avatar" id="preview" class="rounded-circle border" 
+                                            style="width: 150px; height: 150px; object-fit: cover;">
+                                        <label for="foto-input" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2" style="cursor: pointer;">
+                                            <i class="bi bi-camera-fill"></i>
+                                        </label>
+                                        <input type="file" id="foto-input" name="nueva_foto" class="d-none" accept="image/*">
+                                    </div>
+                                    <p class="small text-muted mt-2">Haz clic para cambiar la imagen de perfil</p>
+                                </div>
 
+                                <hr class="my-4">
+
+                                <!-- Datos Dinámicos -->
+                                <div class="row g-3">
+                                    <!-- Nombre: Siempre visible, pero cambia el ancho si no hay apellido -->
+                                    <div class="{% if user.tipo_perfil|upper == 'ESTUDIANTE' %}col-md-6{% else %}col-md-12{% endif %}">
+                                        <label class="form-label fw-bold small">Nombre {% if user.tipo_perfil|upper != 'ESTUDIANTE' %}(Razón Social){% endif %}</label>
+                                        <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}">
+                                    </div>
+
+                                    <!-- Apellido: Solo para estudiantes -->
+                                    {% if user.tipo_perfil|upper == 'ESTUDIANTE' %}
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold small">Apellido</label>
+                                        <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
+                                    </div>
+                                    {% endif %}
+
+                                    <!-- Contacto (Común para todos) -->
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold small">Teléfono de Contacto</label>
+                                        <input type="text" name="telefono" class="form-control" value="{{ user.telefono|default:'' }}">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold small">Correo Electrónico</label>
+                                        <input type="email" class="form-control bg-light" value="{{ user.email }}" readonly>
+                                    </div>
+
+                                    <!-- Dirección (Común para todos) -->
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold small">Dirección</label>
+                                        <input type="text" name="direccion" class="form-control" value="{{ user.direccion|default:'' }}">
+                                    </div>
+
+                                    <!-- Detalles Específicos de Estudiante -->
+                                    {% if user.tipo_perfil|upper == 'ESTUDIANTE' %}
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold small">Centro Educacional</label>
+                                        <input type="text" class="form-control bg-light" value="{{ user.centro_educacional.nombre }}" readonly>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold small">Curso / Nivel</label>
+                                        <input type="text" class="form-control bg-light" value="{{ user.curso|default:'No asignado' }}" readonly>
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="d-grid gap-2 mt-5">
+                                    <button type="submit" class="btn btn-primary fw-bold" style="border-radius: 10px;">
+                                        Guardar Cambios
+                                    </button>
+                                    <!-- Botón de cancelación dinámico según el rol -->
+                                    <a href="{% if user.tipo_perfil|upper == 'ESTUDIANTE' %}{% url 'student' %}{% elif user.tipo_perfil|upper == 'COLEGIO' %}{% url 'school' %}{% else %}{% url 'business' %}{% endif %}" 
+                                    class="btn btn-outline-secondary btn-sm border-0">Salir</a>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- que quede al final del html siempre -->
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+        <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+
+        <script>
+            document.getElementById('foto-input').onchange = evt => {
+                const [file] = document.getElementById('foto-input').files
+                if (file) {
+                    document.getElementById('preview').src = URL.createObjectURL(file)
+                }
+            }
+        </script>
     </body>
 </html>
 
