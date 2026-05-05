@@ -1,3 +1,4 @@
+from django.conf.urls.static import static
 from django.urls import path, include
 from django.conf import settings
 from . import views
@@ -32,6 +33,8 @@ urlpatterns = [
     #Funciones generales
     path('post/', views.crear_post, name='crear_post'),
     path('like/<int:post_id>/', views.toggle_like, name='toggle_like'),
+    path('mi-perfil/', views.ver_perfil, name='ver_perfil'),
+    path('mi-perfil/actualizar/', views.actualizar_perfil, name='actualizar_perfil'),
 
 
     path('testalert/', views.testalert, name='testalert')
@@ -42,3 +45,6 @@ if settings.DEBUG:
     urlpatterns = [
         path("__debug__/", include(debug_toolbar.urls)),
     ] + urlpatterns
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

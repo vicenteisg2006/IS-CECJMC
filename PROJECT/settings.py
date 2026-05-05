@@ -14,9 +14,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-CLOUDFLARE_ACCOUNT_ID = os.getenv('CLOUDFLARE_ACCOUNT_ID')
-CLOUDFLARE_API_TOKEN = os.getenv('CLOUDFLARE_API_TOKEN')
-CLOUDFLARE_ACCOUNT_HASH = os.getenv('CLOUDFLARE_ACCOUNT_HASH')
+# # Configuración de AWS S3
+# AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+# AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+# AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+# AWS_S3_REGION_NAME = 'sa-east-1'  # Región de AWS en Sudamérica (São Paulo)
+
+# # Configurar Django para que use S3 para archivos multimedia
+# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# # URL pública para acceder a las fotos
+# MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -29,6 +37,7 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'jazzmin',
     'debug_toolbar',
+    'storages',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -145,3 +154,6 @@ JAZZMIN_SETTINGS = {
         "APP.Region": "fas fa-map-marker-alt",
     },
 }
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'APP', 'media')
+MEDIA_URL = '/media/'

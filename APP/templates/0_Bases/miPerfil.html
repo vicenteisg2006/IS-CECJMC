@@ -1,0 +1,74 @@
+{% extends "0_Bases/1base.html" %}
+{% load static %}
+
+{% block title %}Mi Perfil - REL+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm" style="border-radius: 15px;">
+                <div class="card-header bg-white border-0 pt-4">
+                    <h3 class="fw-bold text-center">Configuración de Perfil</h3>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    
+                    <!-- Formulario de Actualización -->
+                    <form action="{% url 'actualizar_perfil' %}" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Sección de Foto -->
+                        <div class="text-center mb-4">
+                            <div class="position-relative d-inline-block">
+                                <img src="{{ user.get_avatar }}" alt="Avatar" id="preview" class="rounded-circle border" 
+                                     style="width: 150px; height: 150px; object-fit: cover;">
+                                <label for="foto-input" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2" style="cursor: pointer;">
+                                    <i class="bi bi-camera-fill"></i>
+                                </label>
+                                <input type="file" id="foto-input" name="nueva_foto" class="d-none" accept="image/*">
+                            </div>
+                            <p class="small text-muted mt-2">Haz clic en la cámara para cambiar tu foto</p>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Datos Personales -->
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Nombre</label>
+                                <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Apellido</label>
+                                <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold small">Centro Educacional</label>
+                                <input type="text" class="form-control bg-light" value="{{ user.centro_educacional.nombre }}" readonly>
+                                <div class="form-text">El centro educacional no puede ser cambiado por el alumno.</div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-5">
+                            <button type="submit" class="btn btn-primary fw-bold" style="border-radius: 10px;">
+                                Guardar Cambios
+                            </button>
+                            <a href="{% url 'student' %}" class="btn btn-outline-secondary btn-sm border-0">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script para previsualizar la foto antes de subirla -->
+<script>
+    document.getElementById('foto-input').onchange = evt => {
+        const [file] = document.getElementById('foto-input').files
+        if (file) {
+            document.getElementById('preview').src = URL.createObjectURL(file)
+        }
+    }
+</script>
+{% endblock %}

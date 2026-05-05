@@ -415,3 +415,24 @@ def toggle_like(request, post_id):
         'liked': liked,
         'count': post.likes.count()
     })
+
+@login_required
+def ver_perfil(request):
+    return render(request, '0_Bases/miPerfil.html')
+
+@login_required
+def actualizar_perfil(request):
+    if request.method == 'POST':
+        user = request.user
+        
+        nueva_foto = request.FILES.get('nueva_foto')
+        if nueva_foto:
+            user.avatar = nueva_foto 
+            
+        user.first_name = request.POST.get('first_name')
+        user.last_name = request.POST.get('last_name')
+        
+        user.save()
+        messages.success(request, "¡Información actualizada!")
+        
+    return redirect('ver_perfil')
