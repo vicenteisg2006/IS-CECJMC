@@ -1,0 +1,84 @@
+<!-- Llamada a Base + Nombre colegio -->
+{% extends "0_Bases/3base.html" %}
+{% load static %}
+{% block title %}{{ request.user.first_name }} - Moderación de Contenido{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col-lg-8 col-md-8">
+            <h2 class="fw-bold">Moderación de Contenido</h2>
+            <p class="text-muted">Revisa y administra las publicaciones realizadas por los estudiantes de tu institución en el muro general de REL+.</p>
+        </div>
+
+    <!-- Tabla de Publicaciones -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm" style="border-radius: 15px;">
+                <div class="card-body px-0 pt-0">
+                    <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th class="ps-4 text-muted small fw-bold">Autor</th>
+                                    <th class="text-muted small fw-bold" style="width: 50%;">Publicación</th>
+                                    <th class="text-muted small fw-bold">Fecha y Hora</th>
+                                    <th class="text-muted small fw-bold text-center pe-4">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for post in posts %}
+                                <tr>
+                                    <!-- Datos del Autor -->
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <img src="{{ post.usuario.get_avatar }}" class="rounded-circle me-2 object-fit-cover" width="35" height="35" alt="Avatar">
+                                            <div>
+                                                <div class="fw-bold" style="font-size: 0.85rem;">{{ post.usuario.first_name }} {{ post.usuario.last_name }}</div>
+                                                <div class="text-muted" style="font-size: 0.75rem;">{{ post.usuario.curso|default:"Sin curso" }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    
+                                    <!-- Contenido del Post -->
+                                    <td>
+                                        <p class="mb-0 text-truncate text-wrap" style="font-size: 0.85rem; max-width: 500px;">
+                                            {{ post.mensaje }}
+                                        </p>
+                                    </td>
+                                    
+                                    <!-- Fecha -->
+                                    <td>
+                                        <span class="small text-muted">{{ post.fecha_publicacion|date:"d M, Y H:i" }}</span>
+                                    </td>
+                                    
+                                    <!-- Botón de Eliminar -->
+                                    <td class="text-center pe-4">
+                                        <form action="{% url 'eliminar_post_colegio' post.id %}" method="POST" class="m-0">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger border-0" 
+                                                    title="Eliminar publicación"
+                                                    onclick="return confirm('¿Estás seguro de que deseas eliminar esta publicación del muro general? Esta acción no se puede deshacer.');">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">
+                                        <i class="bi bi-check-circle fs-1 d-block mb-2 text-success"></i>
+                                        No hay publicaciones recientes de tus estudiantes.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

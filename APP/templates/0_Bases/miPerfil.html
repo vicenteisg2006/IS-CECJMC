@@ -1,4 +1,4 @@
-<!-- Pagina de Perfil -->
+<!-- Pagina de Perfil y Configuracion -->
 
 {% load static %}
 
@@ -12,7 +12,6 @@
         <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-
     </head>
 
     <body>
@@ -20,7 +19,7 @@
             <div class="container-fluid d-flex align-items-center justify-content-between flex-nowrap">
 
                 <!-- Titulito -->
-                <div style="width: 100px;", class="d-none d-sm-block">
+                <div style="width: 100px;" class="d-none d-sm-block">
                     <span class="navbar-brand mb-0 titulito1-navbar">REL+</span>
                 </div>
 
@@ -37,47 +36,39 @@
                 <!-- Icono perfil -->
                 <div style="width: 100px;" class="d-flex justify-content-end">
                     <div class="dropdown">
-
                         <a href="#" class="d-flex align-items-center text-decoration-none text-light"
-                            id="menusitoPerfilsito"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false">
-
+                            id="menusitoPerfilsito" data-bs-toggle="dropdown" aria-expanded="false">
                             <img src="{{ request.user.get_avatar }}" alt="Profile" class="rounded-circle fotito1-navbar">
                         </a>
-
                         <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="menusitoPerfilsito" style="border-radius: 12px; margin-top: 10px;">
-                            <li><h6 class="dropdown-header fw-bold">Mi Cuenta<h6></li>
+                            <li><h6 class="dropdown-header fw-bold">Mi Cuenta</h6></li>
                             <li><a class="dropdown-item" href="{% url 'ver_perfil' %}"><i class="bi bi-person me-2"></i>Perfil</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear-fill me-2"></i>Configuración</a></li>
-
                             <li><hr class="d-lg-none" class="dropdown-divider"></li>
-
                             <li class="d-lg-none"><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="bi bi-door-open me-2"></i> Cerrar Sesión</a></li>
-
                         </ul>
-
                     </div>
                 </div>
 
             </div>
         </nav>
 
-    <!---->
         <div class="container py-4">
             <div class="row justify-content-center">
                 <div class="col-md-8">
-                    <div class="card shadow-sm" style="border-radius: 15px;">
-                        <div class="card-header  border-0 pt-4">
+                    
+                    <!-- ========================================== -->
+                    <!-- TARJETA 1: DATOS DEL PERFIL                -->
+                    <!-- ========================================== -->
+                    <div class="card shadow-sm mb-4" style="border-radius: 15px;">
+                        <div class="card-header bg-white border-0 pt-4">
                             <h3 class="fw-bold text-center">Tu Perfil</h3>
                         </div>
                         <div class="card-body px-4 pb-4">
                             
-                            <!-- Formulario de Actualización Genérico -->
                             <form action="{% url 'actualizar_perfil' %}" method="POST" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 
-                                <!-- Sección de Foto (Común para todos) -->
+                                <!-- Sección de Foto -->
                                 <div class="text-center mb-4">
                                     <div class="position-relative d-inline-block">
                                         <img src="{{ user.get_avatar }}" alt="Avatar" id="preview" class="rounded-circle border" 
@@ -94,13 +85,11 @@
 
                                 <!-- Datos Dinámicos -->
                                 <div class="row g-3">
-                                    <!-- Nombre: Siempre visible, pero cambia el ancho si no hay apellido -->
                                     <div class="{% if user.tipo_perfil|upper == 'ESTUDIANTE' %}col-md-6{% else %}col-md-12{% endif %}">
                                         <label class="form-label fw-bold small">Nombre {% if user.tipo_perfil|upper != 'ESTUDIANTE' %}(Razón Social){% endif %}</label>
                                         <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}">
                                     </div>
 
-                                    <!-- Apellido: Solo para estudiantes -->
                                     {% if user.tipo_perfil|upper == 'ESTUDIANTE' %}
                                     <div class="col-md-6">
                                         <label class="form-label fw-bold small">Apellido</label>
@@ -108,7 +97,6 @@
                                     </div>
                                     {% endif %}
 
-                                    <!-- Contacto (Común para todos) -->
                                     <div class="col-md-6">
                                         <label class="form-label fw-bold small">Teléfono de Contacto</label>
                                         <input type="text" name="telefono" class="form-control" value="{{ user.telefono|default:'' }}">
@@ -118,13 +106,11 @@
                                         <input type="email" class="form-control bg-light" value="{{ user.email }}" readonly>
                                     </div>
 
-                                    <!-- Dirección (Común para todos) -->
                                     <div class="col-12">
                                         <label class="form-label fw-bold small">Dirección</label>
                                         <input type="text" name="direccion" class="form-control" value="{{ user.direccion|default:'' }}">
                                     </div>
 
-                                    <!-- Detalles Específicos de Estudiante -->
                                     {% if user.tipo_perfil|upper == 'ESTUDIANTE' %}
                                     <div class="col-12">
                                         <label class="form-label fw-bold small">Centro Educacional</label>
@@ -139,21 +125,147 @@
 
                                 <div class="d-grid gap-2 mt-5">
                                     <button type="submit" class="btn btn-primary fw-bold" style="border-radius: 10px;">
-                                        Guardar Cambios
+                                        Guardar Datos
                                     </button>
-                                    <!-- Botón de cancelación dinámico según el rol -->
-                                    <a href="{% if user.tipo_perfil|upper == 'ESTUDIANTE' %}{% url 'student' %}{% elif user.tipo_perfil|upper == 'COLEGIO' %}{% url 'school' %}{% else %}{% url 'business' %}{% endif %}" 
-                                    class="btn btn-outline-secondary btn-sm border-0">Salir</a>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+
+                    <!-- ========================================== -->
+                    <!-- TARJETA 2: CONFIGURACIÓN DE LA CUENTA      -->
+                    <!-- ========================================== -->
+                    <div class="card shadow-sm" style="border-radius: 15px;">
+                        <div class="card-header bg-white border-0 pt-4 pb-0">
+                            <h4 class="fw-bold"><i class="bi bi-gear-fill text-muted me-2"></i>Configuración de la Cuenta</h4>
+                            <p class="text-muted small">Administra tu seguridad, notificaciones y privacidad en la plataforma.</p>
+                        </div>
+                        <div class="card-body px-4 pb-4">
+                            
+                            <div class="accordion" id="configAccordion">
+                                
+                                <!-- 1. Seguridad -->
+                                <div class="accordion-item" style="border-radius: 10px; overflow: hidden; margin-bottom: 10px; border: 1px solid #eee;">
+                                    <h2 class="accordion-header" id="headingSecurity">
+                                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSecurity" aria-expanded="false" aria-controls="collapseSecurity">
+                                            <i class="bi bi-shield-lock me-2 text-primary"></i> Seguridad y Acceso
+                                        </button>
+                                    </h2>
+                                    <div id="collapseSecurity" class="accordion-collapse collapse" aria-labelledby="headingSecurity" data-bs-parent="#configAccordion">
+                                        <div class="accordion-body bg-light">
+                                            <form action="{% url 'cambiar_password' %}" method="POST">
+                                                {% csrf_token %}
+                                                <div class="mb-3">
+                                                    <label class="form-label small fw-bold">Contraseña Actual</label>
+                                                    <input type="password" class="form-control" name="old_password" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label small fw-bold">Nueva Contraseña</label>
+                                                    <input type="password" class="form-control" name="new_password" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label small fw-bold">Confirmar Nueva Contraseña</label>
+                                                    <input type="password" class="form-control" name="confirm_password" required>
+                                                </div>
+                                                <button type="submit" class="btn btn-dark btn-sm w-100 mt-2">Actualizar Contraseña</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 2. Notificaciones -->
+                                <div class="accordion-item" style="border-radius: 10px; overflow: hidden; margin-bottom: 10px; border: 1px solid #eee;">
+                                    <h2 class="accordion-header" id="headingNotif">
+                                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNotif" aria-expanded="false" aria-controls="collapseNotif">
+                                            <i class="bi bi-bell me-2 text-warning"></i> Preferencias de Notificaciones
+                                        </button>
+                                    </h2>
+                                    <div id="collapseNotif" class="accordion-collapse collapse" aria-labelledby="headingNotif" data-bs-parent="#configAccordion">
+                                        <div class="accordion-body bg-light">
+                                            <form action="{% url 'configurar_notificaciones' %}" method="POST">
+                                                {% csrf_token %}
+                                                <div class="form-check form-switch mb-3">
+                                                    <input class="form-check-input" type="checkbox" id="notifEmail" name="notifEmail"
+                                                        {% if user.notif_email %}checked{% endif %}>
+                                                    <label class="form-check-label small" for="notifEmail">Recibir alertas por correo electrónico</label>
+                                                </div>
+                                                <div class="form-check form-switch mb-3">
+                                                    <input class="form-check-input" type="checkbox" id="notifMensajes" name="notifMensajes"
+                                                        {% if user.notif_mensajes %}checked{% endif %}>
+                                                    <label class="form-check-label small" for="notifMensajes">Notificaciones de nuevos mensajes en la plataforma</label>
+                                                </div>
+                                                {% if user.tipo_perfil|upper == 'ESTUDIANTE' %}
+                                                <div class="form-check form-switch mb-3">
+                                                    <input class="form-check-input" type="checkbox" id="notifPracticas" name="notifPracticas"
+                                                        {% if user.notif_practicas %}checked{% endif %}>
+                                                    <label class="form-check-label small" for="notifPracticas">Avisarme sobre nuevas prácticas profesionales</label>
+                                                </div>
+                                                {% endif %}
+                                                <button type="submit" class="btn btn-outline-primary btn-sm w-100 mt-2">Guardar Preferencias</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 3. Privacidad y Datos -->
+                                <div class="accordion-item" style="border-radius: 10px; overflow: hidden; margin-bottom: 10px; border: 1px solid #eee;">
+                                    <h2 class="accordion-header" id="headingPrivacy">
+                                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePrivacy" aria-expanded="false" aria-controls="collapsePrivacy">
+                                            <i class="bi bi-eye me-2 text-success"></i> Privacidad de la Cuenta
+                                        </button>
+                                    </h2>
+                                    <div id="collapsePrivacy" class="accordion-collapse collapse" aria-labelledby="headingPrivacy" data-bs-parent="#configAccordion">
+                                        <div class="accordion-body bg-light">
+                                            
+                                            <!-- Formulario de Visibilidad -->
+                                            <form action="{% url 'configurar_privacidad' %}" method="POST" class="mb-4">
+                                                {% csrf_token %}
+                                                <label class="form-label small fw-bold">Visibilidad del Perfil</label>
+                                                <div class="d-flex gap-2">
+                                                    <select class="form-select form-select-sm" name="visibilidad">
+                                                        <option value="publico" {% if user.visibilidad_perfil == 'publico' %}selected{% endif %}>
+                                                            Público (Todos pueden ver mi perfil)
+                                                        </option>
+                                                        <option value="privado" {% if user.visibilidad_perfil == 'privado' %}selected{% endif %}>
+                                                            Privado (Solo visible al postular o interactuar)
+                                                        </option>
+                                                    </select>
+                                                    <button type="submit" class="btn btn-success btn-sm">Guardar</button>
+                                                </div>
+                                                <div class="form-text" style="font-size: 0.75rem;">Para mantener un estándar profesional, las empresas siempre verán tus datos básicos al momento de postular.</div>
+                                            </form>
+                                            
+                                            <hr>
+                                            
+                                            <!-- Botón de Descarga JSON -->
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-0 fw-bold fs-6">Mis Datos</h6>
+                                                    <small class="text-muted" style="font-size: 0.75rem;">Descarga una copia de tu información.</small>
+                                                </div>
+                                                <!-- Este botón funciona como un enlace directo, no necesita form -->
+                                                <a href="{% url 'descargar_datos_json' %}" class="btn btn-sm btn-outline-success">
+                                                    <i class="bi bi-download me-1"></i> JSON
+                                                </a>
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div> <!-- Fin Accordion -->
+                            
+                            <!-- Botón de Salir General (Movido al final de ambas tarjetas) -->
+                            <div class="mt-4 text-center">
+                                <a href="{% if user.tipo_perfil|upper == 'ESTUDIANTE' %}{% url 'student' %}{% elif user.tipo_perfil|upper == 'COLEGIO' %}{% url 'school' %}{% else %}{% url 'business' %}{% endif %}" 
+                                class="btn btn-secondary px-5" style="border-radius: 10px;">Volver al Inicio</a>
+                            </div>
 
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-
 
         <!-- que quede al final del html siempre -->
         <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
@@ -169,7 +281,6 @@
         </script>
     </body>
 </html>
-
 
 
 

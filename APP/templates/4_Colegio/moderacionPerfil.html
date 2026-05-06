@@ -6,69 +6,73 @@
 <!-- Contenido específico de Moderación de Perfiles -->
 {% block content %}
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-lg-8 col-md-8 mb-3">
-            <h2>Moderación de perfiles</h2>
-            <p>Aquí puedes gestionar (crear, editar y moderar) los perfiles dentro de la plataforma.</p>
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-lg-8 col-md-8">
+            <h2 class="fw-bold">Gestión de Perfiles</h2>
+            <p class="text-muted">Gestiona la creación masiva de cuentas y administra el acceso de los usuarios a la plataforma.</p>
         </div>
     </div>
     
-    <div class="row mb-4">
-        <div class="col">
-            <div class="card h-100 shadow-sm">
+    <div class="row g-4 mb-4">
+        
+        <!-- ========================================== -->
+        <!-- TARJETA 1: CREAR PERFILES (Excel)          -->
+        <!-- ========================================== -->
+        <div class="col-md-12">
+            <div class="card h-100 shadow-sm" style="border-radius: 15px;">
                 <div class="card-body">
-                    <h5 class="card-title"><i class="bi bi-person-plus-fill me-2"></i>Crear Perfil</h5>
+                    <h5 class="card-title fw-bold"><i class="bi bi-person-plus-fill me-2 text-primary"></i>Crear Perfiles</h5>
+                    <p class="small text-muted">Sube archivos Excel para la creación masiva de cuentas de tu institución.</p>
 
                     <div class="d-grid gap-2 mt-3">
                         <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExcel1" aria-expanded="false" aria-controls="collapseExcel1">
-                            Cargar excel (Estudiantes)
+                            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Cargar Excel (Estudiantes)
                         </button>
 
                         <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExcel2" aria-expanded="false" aria-controls="collapseExcel2">
-                            Cargar excel (Empresas)
+                            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Cargar Excel (Empresas)
                         </button>
-
                     </div>
 
+                    <!-- Colapsable Estudiantes -->
                     <div class="collapse" id="collapseExcel1">
-                        <div class="card card-body border-0 bg-light mt-3">
+                        <div class="card card-body border-0 bg-light mt-3" style="border-radius: 10px;">
                             <form action="{% url 'cargarPerfilesEstudiantes_excel' %}" method="POST" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <div class="mb-3">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <label for="archivo_excel" class="form-label small fw-bold mb-0">Selecciona el archivo .xlsx para subir perfiles de tipo estudiante</label>
-                                        <a href="{% static 'archivos/Plantila Referencia Estudiantes.xlsx' %}" class="btn btn-link btn-sm text-decoration-none" download>
-                                            <i class="bi bi-download me-1"></i> Descargar plantilla estudiante
+                                        <label for="archivo_excel" class="form-label small fw-bold mb-0">Selecciona el archivo .xlsx</label>
+                                        <a href="{% static 'archivos/Plantila Referencia Estudiantes.xlsx' %}" class="btn btn-link btn-sm text-decoration-none p-0" download>
+                                            <i class="bi bi-download"></i> Plantilla referencia estudiantes
                                         </a>
                                     </div>
                                     <input type="file" name="archivo_excel" class="form-control form-control-sm" accept=".xlsx, .xls" required>
                                 </div>
                                 <div class="d-flex justify-content-end gap-2">
-                                    <!-- Botón para cancelar/cerrar -->
-                                    <button type="button" class="btn btn-light btn-sm" data-bs-toggle="collapse" data-bs-target="#collapseExcel1">Cancelar</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#collapseExcel1">Cancelar</button>
                                     <button type="submit" class="btn btn-primary btn-sm px-4">Subir Archivo</button>
                                 </div>
                             </form>
                         </div>
                     </div>
 
+                    <!-- Colapsable Empresas -->
                     <div class="collapse" id="collapseExcel2">
-                        <div class="card card-body border-0 bg-light mt-3">
+                        <div class="card card-body border-0 bg-light mt-3" style="border-radius: 10px;">
                             <form action="{% url 'cargarPerfilesEmpresas_excel' %}" method="POST" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <div class="mb-3">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <label for="archivo_excel" class="form-label small fw-bold mb-0">Selecciona el archivo .xlsx para subir perfiles de tipo empresa</label>
-                                        <a href="{% static 'archivos/Plantilla Referencia Empresas.xlsx' %}" class="btn btn-link btn-sm text-decoration-none" download>
-                                            <i class="bi bi-download me-1"></i> Descargar plantilla empresa
+                                        <label for="archivo_excel" class="form-label small fw-bold mb-0">Selecciona el archivo .xlsx</label>
+                                        <a href="{% static 'archivos/Plantilla Referencia Empresas.xlsx' %}" class="btn btn-link btn-sm text-decoration-none p-0" download>
+                                            <i class="bi bi-download"></i> Plantilla referencia empresas
                                         </a>
                                     </div>
                                     <input type="file" name="archivo_excel" class="form-control form-control-sm" accept=".xlsx, .xls" required>
                                 </div>
                                 <div class="d-flex justify-content-end gap-2">
-                                    <!-- Botón para cancelar/cerrar -->
-                                    <button type="button" class="btn btn-light btn-sm" data-bs-toggle="collapse" data-bs-target="#collapseExcel2">Cancelar</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#collapseExcel2">Cancelar</button>
                                     <button type="submit" class="btn btn-primary btn-sm px-4">Subir Archivo</button>
                                 </div>
                             </form>
@@ -78,50 +82,88 @@
                 </div>
             </div>
         </div>
+
+        <!-- ========================================== -->
+        <!-- TARJETA 2: BUSCAR Y MODERAR CUENTAS        -->
+        <!-- ========================================== -->
+        <div class="col-md-12">
+            <div class="card h-100 shadow-sm" style="border-radius: 15px;">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold"><i class="bi bi-person-slash me-2 text-danger"></i>Suspender Cuentas</h5>
+                    <p class="small text-muted">Busca un usuario activo para restringir temporalmente su acceso a la plataforma.</p>
+
+                    <!-- Buscador -->
+                    <form action="{% url 'moderacionPerfil' %}" method="GET" class="mb-3">
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control bg-light" name="q" placeholder="Buscar por nombre, apellido o correo..." style="border-radius: 10px 0 0 10px;">
+                            <button class="btn btn-dark" type="submit" style="border-radius: 0 10px 10px 0;"><i class="bi bi-search"></i></button>
+                        </div>
+                    </form>
+
+                    <!-- Tabla de Resultados -->
+                    <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                        <table class="table table-sm table-hover align-middle border-top">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th class="small text-muted fw-bold">Usuario</th>
+                                    <th class="small text-muted fw-bold">Rol</th>
+                                    <th class="small text-muted fw-bold text-center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for u in usuarios_busqueda %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold" style="font-size: 0.85rem;">{{ u.first_name }} {{ u.last_name }}</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">{{ u.email|default:u.username }}</div>
+                                    </td>
+                                    <td>
+                                        {% if u.tipo_perfil %}
+                                            <span class="badge bg-info text-dark" style="font-size: 0.7rem;">{{ u.tipo_perfil.tipo_perfil }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary" style="font-size: 0.7rem;">Sin Rol</span>
+                                        {% endif %}
+                                        
+                                        <!-- Etiqueta visual si la cuenta está suspendida -->
+                                        {% if not u.is_active %}
+                                            <span class="badge bg-danger ms-1" style="font-size: 0.7rem;">Suspendida</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <!-- Formulario POST para la acción segura -->
+                                        <form action="{% url 'suspender_usuario' u.id %}" method="POST" class="d-inline">
+                                            {% csrf_token %}
+                                            {% if u.is_active %}
+                                                <button type="submit" class="btn btn-sm btn-outline-danger border-0" title="Suspender cuenta" onclick="return confirm('¿Seguro que deseas suspender la cuenta de {{ u.first_name }}? Ya no podrá iniciar sesión.');">
+                                                    <i class="bi bi-power"></i>
+                                                </button>
+                                            {% else %}
+                                                <!-- Botón para devolverles el acceso si se arrepienten -->
+                                                <button type="submit" class="btn btn-sm btn-outline-success border-0" title="Reactivar cuenta">
+                                                    <i class="bi bi-check-circle"></i>
+                                                </button>
+                                            {% endif %}
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted small py-4">
+                                        {% if query %}
+                                            No se encontraron usuarios con "{{ query }}".
+                                        {% else %}
+                                            No hay usuarios registrados en este colegio aún.
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        
-        <div class="col">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title"><i class="bi bi-people-fill me-2"></i>Alumnos</h5>
-                    <p class="card-text text-muted small">Gestión de matrículas, edición de perfiles y carga masiva de notas.</p>
-                    <div class="d-grid gap-2 mt-3">
-                        <a href="#" class="btn btn-outline-primary btn-sm">Agregar Alumno</a>
-                        <a href="#" class="btn btn-outline-secondary btn-sm">Cargar Excel</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title text-success"><i class="bi bi-building me-2"></i>Empresas</h5>
-                    <p class="card-text text-muted small">Registrar nuevas empresas aliadas y gestionar convenios de práctica.</p>
-                    <div class="d-grid gap-2 mt-3">
-                        <a href="#" class="btn btn-outline-success btn-sm">Nueva Empresa</a>
-                        <a href="#" class="btn btn-outline-secondary btn-sm">Ver Listado</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title text-danger"><i class="bi bi-shield-lock-fill me-2"></i>Moderación</h5>
-                    <p class="card-text text-muted small">Supervisión de contenido en el muro y eliminación de publicaciones.</p>
-                    <div class="d-grid gap-2 mt-3">
-                        <a href="#" class="btn btn-outline-danger btn-sm">Revisar Posts</a>
-                        <a href="#" class="btn btn-outline-secondary btn-sm">Reportes</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
 </div>
 {% endblock %}

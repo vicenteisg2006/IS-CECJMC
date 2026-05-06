@@ -79,6 +79,20 @@ class Usuario(AbstractUser):
     bio = models.TextField(blank=True, null=True)
     curso = models.CharField(max_length=100, blank=True, null=True)
 
+    notif_email = models.BooleanField(default=True)
+    notif_mensajes = models.BooleanField(default=True)
+    notif_practicas = models.BooleanField(default=True)
+
+    VISIBILIDAD_CHOICES = [
+        ('publico', 'Público'),
+        ('privado', 'Privado'),
+    ]
+    visibilidad_perfil = models.CharField(
+        max_length=20, 
+        choices=VISIBILIDAD_CHOICES, 
+        default='publico'
+    )
+
     @property
     def get_avatar(self):
         if self.avatar:

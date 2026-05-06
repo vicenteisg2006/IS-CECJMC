@@ -19,9 +19,31 @@
 
                     <p class="card-text text-muted small">a ver que imprime esto</p>
                     <div class="d-grid gap-2 mt-3">
+                        <!-- Función Principal 1 -->
                         <a href="{% url 'moderacionPerfil' %}" class="btn btn-secondary btn-sm">Gestionar perfiles</a>
-                        <a href="#" class="btn btn-secondary btn-sm">Gestionar contenido</a>
-                        <a href="#" class="btn btn-secondary btn-sm">Ver Más</a>
+                        
+                        <!-- Función Principal 2 -->
+                        <a href="{% url 'moderacionContenido' %}" class="btn btn-secondary btn-sm">Gestionar contenido</a>
+                        
+                        <!-- Función Secundaria: Botón Dropdown (Ver Más) -->
+                        <div class="dropdown d-grid">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="dropdownModeracion" data-bs-toggle="dropdown" aria-expanded="false">
+                                Ver Más
+                            </button>
+                            <!-- La lista flotante que aparece al hacer clic -->
+                            <ul class="dropdown-menu w-100 shadow-sm border-0" aria-labelledby="dropdownModeracion">
+                                <li>
+                                    <a class="dropdown-item small text-muted" href="#">
+                                        <i class="bi bi-inbox me-2"></i>Buzón de denuncias (proximamente)<i class="bi bi-lock-fill ms-1" style="font-size: 0.7rem;"></i>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item small text-muted" href="#">
+                                        <i class="bi bi-clock-history me-2"></i>Registro de auditoría (proximamente)<i class="bi bi-lock-fill ms-1" style="font-size: 0.7rem;"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
 
                 </div>
