@@ -2,16 +2,31 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 
-
 #         #######################################
 #       ############# TABLAS MAESTRAS #############
 #         #######################################
 
-class TipoPerfil(models.Model):
-    tipo_perfil = models.CharField(max_length=50)
+# muy estaticas, se añaden acá para mejorar velocidad, sacrificando la
+# forma normal, de mantener todo por separado y hacer JOINs
+class EstadoOferta(models.TextChoices):
+    ACTIVA = 'activa','Activa'
+    INACTIVA = 'inactiva','Inactiva'
+    EXPIRADA = 'expirada','Expirada'
 
-    def __str__(self):
-        return self.tipo_perfil
+class EstadoSolicitud(models.TextChoices):
+    ACEPTADA = 'aceptada','Aceptada'
+    RECHAZADA = 'rechazada','Rechazada'
+    PENDIENTE = 'pendiente','Pendiente'
+
+class EstadoVerificacion(models.TextChoices):
+    APROBADO = 'aprobado','Aprobado'
+    RECHAZADO = 'rechazado','Rechazado'
+    PENDIENTE = 'pendiente','Pendiente'
+
+class TipoPerfil(models.TextChoices):
+    ESTUDIANTE = 'estudiante','Estudiante'
+    COLEGIO = 'colegio','Colegio'
+    EMPRESA = 'empresa','Empresa'
 
 class Region(models.Model):
     region = models.CharField(max_length=100)
@@ -32,8 +47,6 @@ class Slep(models.Model):
     def __str__(self):
         return self.nombre
 
-#
-
 class CentroEducacional(models.Model):
     slep = models.ForeignKey(Slep, on_delete=models.SET_NULL, null=True)
     nombre = models.CharField(max_length=200)
@@ -44,27 +57,30 @@ class CentroEducacional(models.Model):
     def __str__(self):
         return self.nombre
 
-class EstadoVerificacion(models.Model):
-    estado_verificacion = models.CharField(max_length=50)
-
-class EstadoOferta(models.Model):
-    estado = models.CharField(max_length=50)
-
-class EstadoSolicitud(models.Model):
-    estado = models.CharField(max_length=50)
-
 class Requisito(models.Model):
     requisito = models.CharField(max_length=255)
     
+class TipoCompetencia(models.TextChoices):
+    ESPECIALIDAD = 'especialidad','Especialidad'
+    OFICIO = 'oficio','Oficio'
+
 class Competencia(models.Model):
-    tipo_competencia = models.CharField(
-        max_length=255,
-        choices=[('ESP','Especialidad'),('OFI','Oficio')]
-        )
+    tipo_competencia = models.ForeignKey(TipoCompetencia, on_delete=models.SET_NULL, null=True)
     competencia = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"{self.get_tipo_competencia_display()} - {self.competencia}"
+        return f"{self.tipo_competencia} - {self.competencia}"
+
+class TipoHabilidad(models.TextChoices):
+    TECNICA = 'tecnica','Técnica'
+    INTERPERSONAL = 'interpersonal','Interpersonal'
+
+class Habilidad(models.Model):
+    tipo_habilidad = models.ForeignKey(TipoHabilidad, on_delete=models.SET_NULL, null=True)
+    habilidad = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.habilidad
 
 class Curso(models.Model):
     nombre = models.CharField(max_length=50)
@@ -72,7 +88,6 @@ class Curso(models.Model):
 
     def __str__(self):
         return f"{self.nombre} ({self.centro_educacional.nombre})"
-
 
 #         #######################################
 #       ############## TABLA USUARIO ###############
@@ -83,7 +98,8 @@ class Usuario(AbstractUser):
     telefono = models.CharField(max_length=20, blank=True, null=True)
     direccion = models.CharField(max_length=255, blank=True, null=True)
     email = models.EmailField(max_length=255, blank=True, null=True)
-    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    # Reverted avatar ImageField back to avatar_url URLField
+    avatar_url = models.URLField(max_length=500, null=True, blank=True)
     bio = models.TextField(blank=True, null=True)
 
     notif_email = models.BooleanField(default=True)
@@ -95,115 +111,108 @@ class Usuario(AbstractUser):
         ('privado', 'Privado'),
     ]
     visibilidad_perfil = models.CharField(
-        max_length=20, 
-        choices=VISIBILIDAD_CHOICES, 
+        max_length=20,
+        choices=VISIBILIDAD_CHOICES,
         default='publico'
     )
 
     @property
     def get_avatar(self):
-        if self.avatar:
-            return self.avatar.url
+        if self.avatar_url:
+            return self.avatar_url
         return '/static/images/profilepic1.jpg'
-    
+
     # Llaves Foráneas (Foreign Keys)
     tipo_perfil = models.ForeignKey(TipoPerfil, on_delete=models.SET_NULL, null=True)
     region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True)
     comuna = models.ForeignKey(Comuna, on_delete=models.SET_NULL, null=True)
     centro_educacional = models.ForeignKey(CentroEducacional, on_delete=models.SET_NULL, blank=True, null=True)
-    colegios_vinculados = models.ManyToManyField('CentroEducacional', related_name='empresas_asociadas', blank=True) #para las empresas
-    competencias = models.ManyToManyField(Competencia, related_name='usuarios_competencia', blank=True)
+    colegios_vinculados = models.ManyToManyField('CentroEducacional', related_name='empresas_asociadas', blank=True)
+    competencias = models.ManyToManyField(Competencia, related_name='usuarios_competencia', blank=True, through='CompetenciaEstudiante')
     curso = models.ForeignKey(Curso, on_delete=models.SET_NULL, null=True, blank=True)
 
-    # Vista mas ordenada para el admin
     def __str__(self):
         tipoo = self.tipo_perfil.tipo_perfil.lower() if self.tipo_perfil else "Desconocido"
 
-        if tipoo == "estudiante" or tipoo == "alumno":
+        if tipoo in ["estudiante", "alumno"]:
             return f"{self.tipo_perfil} - {self.centro_educacional} - {self.first_name} {self.last_name}"
-        
         elif tipoo == "colegio":
             return f"{self.tipo_perfil} - {self.centro_educacional}"
-        
         elif tipoo == "empresa":
             return f"{self.tipo_perfil} - {self.first_name}"
-        
         else:
             return f"Super Admin - {self.username}"
-        
+
 
 # entidades
 
 class Certificado(models.Model):
-    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='certificados')
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='certificados_creados')
     certificacion = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True)
+    entidad_emisora = models.CharField(max_length=200)
+
+class ObtencionCertificado(models.Model):
+    estudiante = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='certificados_obtenidos')
+    certificado = models.ForeignKey(Certificado, on_delete=models.CASCADE)
     fecha_obtencion = models.DateField()
     fecha_expiracion = models.DateField(null=True, blank=True)
-    entidad_emisora = models.CharField(max_length=200)
+    url = models.URLField(max_length=500, blank=True)
     estado_verificacion = models.ForeignKey(EstadoVerificacion, on_delete=models.SET_NULL, null=True)
-    url = models.URLField(blank=True)
+
+class HabilidadUsuario(models.Model):
+    habilidad = models.ForeignKey(Habilidad, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    competencia = models.CharField(max_length=100)
+    estado_verificacion = models.ForeignKey(EstadoVerificacion, on_delete=models.SET_NULL, null=True)
+
+class CompetenciaEstudiante(models.Model):
+    competencia = models.ForeignKey(Competencia, on_delete=models.CASCADE)
+    estudiante = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    fecha_registro = models.DateField(auto_now_add=True)
+    estado_verificacion = models.ForeignKey(EstadoVerificacion, on_delete=models.SET_NULL, null=True)
 
 class ExperienciaLaboral(models.Model):
-    usuario = models.ForeignKey(
-        Usuario, 
-        on_delete=models.CASCADE, 
-        related_name='experiencias_como_estudiante' # Django needs this!
-    )
-    
-    empresa_registrada = models.ForeignKey(
-        Usuario, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True, 
-        related_name='experiencias_como_empresa' # Django needs this!
-    )
-    
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='experiencias_como_estudiante')
+    empresa_registrada = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True, related_name='experiencias_como_empresa')
     institucion_laboral = models.CharField(max_length=200, blank=True)
-    
     contacto = models.CharField(max_length=200, blank=True)
     fecha_inicio = models.DateField()
     fecha_termino = models.DateField(null=True, blank=True)
     horas_trabajadas = models.IntegerField(null=True, blank=True)
+    es_practica = models.BooleanField(default=False)
     estado_verificacion = models.ForeignKey('EstadoVerificacion', on_delete=models.SET_NULL, null=True)
 
     @property
     def obtener_nombre_empresa(self):
-        """
-        Smart logic to return the company name.
-        If a registered user is linked, it returns their official name.
-        If not, it returns the manually typed text.
-        """
         if self.empresa_registrada:
-            # We assume the Usuario model has 'nombre'
-            return self.empresa_registrada.nombre 
+            return self.empresa_registrada.first_name
         elif self.institucion_laboral:
             return self.institucion_laboral
         else:
             return "Empresa Desconocida"
-    
+
     def clean(self):
-        # Check if BOTH fields have data
         if self.empresa_registrada and self.institucion_laboral:
             raise ValidationError("No puedes seleccionar una empresa registrada y escribir un nombre manual al mismo tiempo.")
-        
-        # Check if NEITHER field has data (assuming they must provide at least one)
         if not self.empresa_registrada and not self.institucion_laboral:
             raise ValidationError("Debes proveer una empresa registrada o escribir el nombre de la institución.")
 
 class OfertaLaboral(models.Model):
     puesto_trabajo = models.CharField(max_length=200)
-    empresa = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name = 'ofertas_empresa')
+    empresa = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='ofertas_empresa')
+    competencia = models.ForeignKey(Competencia, on_delete=models.SET_NULL, null=True, blank=True)
+    es_practica = models.BooleanField(default=False)
     fecha_publicacion = models.DateTimeField(auto_now_add=True)
     fecha_expiracion = models.DateTimeField()
     detalle = models.TextField()
-    sueldo = models.DecimalField(max_digits=10, decimal_places=0, null=True, blank=True) # Formato para CLP
+    sueldo = models.DecimalField(max_digits=10, decimal_places=0, null=True, blank=True)
     modalidad = models.CharField(max_length=100)
     ubicacion = models.CharField(max_length=255)
     estado_oferta = models.ForeignKey(EstadoOferta, on_delete=models.SET_NULL, null=True)
-    
-    # Magia de Django: Esto crea la tabla intermedia "RequisitoOfertaLaboral" automáticamente
-    requisitos = models.ManyToManyField(Requisito, related_name='ofertas')
+
+    requisitos_habilidad = models.ManyToManyField(Habilidad, related_name='ofertas', blank=True)
+    requisitos_competencia = models.ManyToManyField(Competencia, related_name='ofertas_relacionadas', blank=True)
 
 class Postulacion(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='postulaciones')
@@ -215,13 +224,9 @@ class Post(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='posts')
     mensaje = models.TextField()
     fecha_publicacion = models.DateTimeField(auto_now_add=True)
-    
-    # Magia de Django: Relación de "Likes" usando una tabla intermedia personalizada
     likes = models.ManyToManyField(Usuario, related_name='liked_posts', through='Like')
 
-# Tabla intermedia de Likes explícita (porque tu ERD pedía guardar la fechaCreacion)
-# clase que podria o podria no estar, quien sabe
-class Like(models.Model): 
+class Like(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
@@ -229,14 +234,20 @@ class Like(models.Model):
 class Multimedia(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='multimedia')
     url = models.URLField(max_length=500)
-    tipo_multimedia = models.CharField(max_length=50) # Ej. 'imagen', 'video'
+    tipo_multimedia = models.CharField(max_length=50)
     fecha_publicacion = models.DateTimeField(auto_now_add=True)
 
 class Comentario(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comentarios')
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
-    comentario = models.TextField()
+    mensaje = models.TextField()
     fecha_publicacion = models.DateTimeField(auto_now_add=True)
+    likes = models.ManyToManyField(Usuario, related_name='liked_comments', through='UsuarioComentarioLike')
+
+class UsuarioComentarioLike(models.Model):
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    comentario = models.ForeignKey(Comentario, on_delete=models.CASCADE)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
 
 class Conexion(models.Model):
     solicitante = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='conexiones_enviadas')
@@ -255,34 +266,24 @@ class Notificacion(models.Model):
         verbose_name_plural = "Notificaciones"
 
 class OfertaPractica(models.Model):
-    ESTADOS_APROBACION = [
-        ('Pendiente', 'Pendiente'),
-        ('Aprobada', 'Aprobada'),
-        ('Rechazada', 'Rechazada'),
-    ]
-    
-    # Relaciones
     empresa = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='practicas_creadas')
     colegio = models.ForeignKey(CentroEducacional, on_delete=models.CASCADE, related_name='practicas_recibidas')
-    
-    # Datos de la oferta
     titulo = models.CharField(max_length=200)
     descripcion = models.TextField()
     cupos = models.PositiveIntegerField(default=1)
-    
-    # Control del colegio
-    estado = models.CharField(max_length=20, choices=ESTADOS_APROBACION, default='Pendiente')
+    estado = models.CharField(max_length=20, choices=ESTADOS_VERIFICACION, default='Pendiente')
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.titulo} - {self.empresa.first_name} ({self.estado})"
-    
+
 class ContenidoEducativo(models.Model):
     colegio = models.ForeignKey(CentroEducacional, on_delete=models.CASCADE, related_name='material_educativo')
     titulo = models.CharField(max_length=200)
     descripcion = models.TextField()
     url_video = models.URLField(blank=True, null=True, help_text="Enlace de YouTube o Vimeo")
-    archivo = models.FileField(upload_to='recursos_educativos/', blank=True, null=True)
+    # Reverted archivo FileField to archivo_url URLField for resources
+    archivo_url = models.URLField(max_length=500, blank=True, null=True)
     fecha_subida = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
