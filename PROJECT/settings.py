@@ -31,6 +31,10 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
+# SECURITY WARNING: keep the secret key used in production secret!
+load_dotenv()
+SECRET_KEY = os.getenv('SECRET_KEY')
+
 # Application definition
 
 INSTALLED_APPS = [
