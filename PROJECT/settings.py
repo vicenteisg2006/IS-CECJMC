@@ -2,6 +2,9 @@ from pathlib import Path
 import dotenv
 from dotenv import load_dotenv
 import os
+import json
+import boto3
+from botocore.exceptions import ClientError
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -9,10 +12,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-load_dotenv()
-SECRET_KEY = os.getenv('SECRET_KEY')
 
 # # Configuración de AWS S3
 # AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
@@ -81,15 +80,44 @@ WSGI_APPLICATION = 'PROJECT.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-dotenv.load_dotenv()
+def get_db_secret():
+    secret_name = "rds!db-5ee031ba-6a62-4897-8ecf-36a856041257" # Put the exact name of your secret from AWS here
+    region_name = "us-east-1b"             # Change if you are in a different region
+
+    # Create a Secrets Manager client
+    session = boto3.session.Session()
+    client = session.client(
+        service_name='secretsmanager',
+        region_name=region_name
+    )
+
+    try:
+        get_secret_value_response = client.get_secret_value(
+            SecretId=secret_name
+        )
+    except ClientError as e:
+        # If it fails, print the error so you can debug
+        raise e
+
+    # Decrypts secret using the associated KMS key and parses the JSON
+    secret = get_secret_value_response['SecretString']
+    return json.loads(secret)
+
+# Call the function to get the dictionary of credentials
+try:
+    db_credentials = get_db_secret()
+except Exception as e:
+    print(f"Warning: Could not load Secrets Manager. {e}")
+    db_credentials = {}
+
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('DB_ENGINE'),
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'relplus_db', 
+        'USER': db_credentials.get('username'),
+        'PASSWORD': db_credentials.get('password'),
+        'HOST': db_credentials.get('host'),
+        'PORT': db_credentials.get('port', '3306'),
     }
 }
 
