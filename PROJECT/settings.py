@@ -82,7 +82,7 @@ WSGI_APPLICATION = 'PROJECT.wsgi.application'
 
 def get_db_secret():
     secret_name = "rds!db-5ee031ba-6a62-4897-8ecf-36a856041257" # Put the exact name of your secret from AWS here
-    region_name = "us-east-1b"             # Change if you are in a different region
+    region_name = "us-east-1"             # Change if you are in a different region
 
     # Create a Secrets Manager client
     session = boto3.session.Session()
