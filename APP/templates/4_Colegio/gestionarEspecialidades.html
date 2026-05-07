@@ -1,0 +1,46 @@
+{% extends "0_Bases/3base.html" %}
+{% block title %}Especialidades Impartidas{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2 class="fw-bold"><i class="bi bi-tools me-2 text-primary"></i>Especialidades del Centro</h2>
+            <p class="text-muted">Selecciona las carreras o especialidades técnicas que imparte tu institución. Esto ayudará a las empresas a encontrarlos.</p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0" style="border-radius: 15px;">
+        <div class="card-body p-4">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row g-4">
+                    {% for esp in todas %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="form-check form-switch p-3 border rounded 
+                            {% if esp in mias %}bg-primary bg-opacity-10 border-primary{% else %}bg-light{% endif %}">
+                            
+                            <input class="form-check-input ms-0 me-3" type="checkbox" role="switch" 
+                                   name="especialidades" value="{{ esp.id }}" id="esp_{{ esp.id }}"
+                                   {% if esp in mias %}checked{% endif %} style="width: 2.5em; height: 1.25em;">
+                            
+                            <label class="form-check-label fw-bold mt-1" for="esp_{{ esp.id }}">
+                                {{ esp.competencia }}
+                            </label>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center text-muted py-3">
+                        No hay especialidades registradas en el sistema maestro de REL+.
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="mt-4 text-end">
+                    <button type="submit" class="btn btn-primary px-5">Guardar Especialidades</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

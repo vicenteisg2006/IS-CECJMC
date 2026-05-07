@@ -14,7 +14,7 @@ from .models import Usuario
 class CustomUserAdmin(UserAdmin):
     # Qué campos mostrar al EDITAR un usuario
     fieldsets = UserAdmin.fieldsets + (
-        ('Datos REL+', {'fields': ('tipo_perfil', 'centro_educacional', 'curso', 'telefono', 'direccion')}),
+        ('Datos REL+', {'fields': ('tipo_perfil', 'centro_educacional', 'curso', 'telefono', 'direccion', 'colegios_vinculados')}),
     )
     # Qué campos mostrar al CREAR un usuario nuevo
     add_fieldsets = UserAdmin.add_fieldsets + (

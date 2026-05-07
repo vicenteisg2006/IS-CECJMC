@@ -61,9 +61,19 @@
 
                     <p class="card-text text-muted small">a ver que imprime esto</p>
                     <div class="d-grid gap-2 mt-3">
-                        <a href="#" class="btn btn-secondary btn-sm">Gestionar alumnos</a>
-                        <a href="#" class="btn btn-secondary btn-sm">Acción 2</a>
-                        <a href="#" class="btn btn-secondary btn-sm">Ver Más</a>
+                        <a href="{% url 'gestionarAlumnos' %}" class="btn btn-secondary btn-sm">Gestionar alumnos</a>
+                        <a href="{% url 'restablecerClaves' %}" class="btn btn-secondary btn-sm">Restablecer contraseñas</a>
+                        
+                        <div class="dropdown d-grid">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Ver Más
+                            </button>
+                            <ul class="dropdown-menu w-100 shadow-sm border-0">
+                                <li><a class="dropdown-item small text-muted" href="#"><i class="bi bi-file-earmark-pdf me-2"></i>Reporte de matriculados (proximamente) <i class="bi bi-lock-fill ms-1" style="font-size: 0.7rem;"></i></a></li>
+                                <li><a class="dropdown-item small text-muted" href="#"><i class="bi bi-graph-up me-2"></i>Estadísticas de nivel (proximamente) <i class="bi bi-lock-fill ms-1" style="font-size: 0.7rem;"></i></a></li>
+                            </ul>
+                        </div>
+                        
                     </div>
 
                 </div>
@@ -81,11 +91,20 @@
 
                     <p class="card-text text-muted small">a ver que imprime esto</p>
                     <div class="d-grid gap-2 mt-3">
-                        <a href="#" class="btn btn-secondary btn-sm">Acción 1</a>
-                        <a href="#" class="btn btn-secondary btn-sm">Acción 2</a>
-                        <a href="#" class="btn btn-secondary btn-sm">Ver Más</a>
-                    </div>
+                        <a href="{% url 'gestionarEmpresas' %}" class="btn btn-secondary btn-sm">Gestionar empresas</a>
+                        <a href="{% url 'aprobarPracticas' %}" class="btn btn-secondary btn-sm">Aprobar prácticas</a>
                     
+                        <div class="dropdown d-grid">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Ver Más
+                            </button>
+                            <ul class="dropdown-menu w-100 shadow-sm border-0">
+                                <li><a class="dropdown-item small text-muted" href="{% url 'metricasEmpresas' %}"><i class="bi bi-graph-up me-2"></i>Métricas</a></li>
+                            </ul>
+                        </div>
+
+                    </div>
+
                 </div>
             </div>
 
@@ -97,13 +116,21 @@
 
             <div class="card h-100">
                 <div class="card-body">
-                    <h5 class="card-title"><i class="bi bi-gear me-2"></i>Conexiones</h5>
+                    <h5 class="card-title"><i class="bi bi-gear me-2"></i>Red Institucional</h5>
 
                     <p class="card-text text-muted small">a ver que imprime esto</p>
                     <div class="d-grid gap-2 mt-3">
-                        <a href="#" class="btn btn-secondary btn-sm">Acción 1</a>
-                        <a href="#" class="btn btn-secondary btn-sm">Acción 2</a>
-                        <a href="#" class="btn btn-secondary btn-sm">Ver Más</a>
+                        <a href="{% url 'seguimientoPracticas' %}" class="btn btn-secondary btn-sm">Seguimiento de Prácticas</a>
+                        <a href="{% url 'redEgresados' %}" class="btn btn-secondary btn-sm">Red de Egresados</a>
+
+                        <div class="dropdown d-grid">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Ver Más
+                            </button>
+                            <ul class="dropdown-menu w-100 shadow-sm border-0">
+                                <li><a class="dropdown-item small text-muted" href="{% url 'reporteEmpleabilidad' %}"><i class="bi bi-graph-up me-2"></i>Métricas de empleabilidad</a></li>
+                            </ul>
+                        </div>
                     </div>
 
                 </div>
@@ -117,13 +144,21 @@
 
             <div class="card h-100">
                 <div class="card-body">
-                    <h5 class="card-title"><i class="bi bi-gear me-2"></i>Funciones área administrativa 5</h5>
+                    <h5 class="card-title"><i class="bi bi-gear me-2"></i>Recursos y Configuración</h5>
 
                     <p class="card-text text-muted small">a ver que imprime esto</p>
                     <div class="d-grid gap-2 mt-3">
-                        <a href="#" class="btn btn-secondary btn-sm">Acción 1</a>
-                        <a href="#" class="btn btn-secondary btn-sm">Acción 2</a>
-                        <a href="#" class="btn btn-secondary btn-sm">Ver Más</a>
+                        <a href="{% url 'gestionarEspecialidades' %}" class="btn btn-secondary btn-sm">Especialidades Impartidas</a>
+                        <a href="{% url 'gestionarContenidoEducativo' %}" class="btn btn-secondary btn-sm">Material Educativo</a>
+
+                        <div class="dropdown d-grid">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Ver Más
+                            </button>
+                            <ul class="dropdown-menu w-100 shadow-sm border-0">
+                                <li><a class="dropdown-item small text-muted" href="{% url 'exportarDatosExcel' %}"><i class="bi bi-graph-up me-2"></i>Exportar Datos</a></li>
+                            </ul>
+                        </div>
                     </div>
 
                 </div>

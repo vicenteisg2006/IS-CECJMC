@@ -8,6 +8,9 @@ from . import models
 import openpyxl
 import pandas as pd
 from django.db.models import Q
+import string
+import random
+import csv
 
 # ===========================================================
 #                                MEDIDAS DE SEGURIDAD
@@ -380,19 +383,329 @@ def eliminar_post_colegio(request, post_id):
             
     return redirect('moderacionContenido')
 
+@login_required
+def gestionarAlumnos(request):
+    tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
+    if tipo_usuario != 'colegio':
+        messages.error(request, 'Acceso denegado.')
+        return redirect('ver_perfil')
+
+    mi_colegio = request.user.centro_educacional
+    
+    alumnos = models.Usuario.objects.filter(
+        centro_educacional=mi_colegio,
+        tipo_perfil__tipo_perfil__iexact='estudiante'
+    ).order_by('last_name')
+
+    query = request.GET.get('q', '') # Capturamos lo que el usuario escribió
+    if query:
+        alumnos = alumnos.filter(
+            Q(first_name__icontains=query) | 
+            Q(last_name__icontains=query) | 
+            Q(email__icontains=query) |
+            Q(username__icontains=query)
+        )
+    cursos_disponibles = models.Curso.objects.filter(centro_educacional=mi_colegio)
+
+    context = {
+        'alumnos': alumnos,
+        'cursos': cursos_disponibles,
+        'query': query 
+    }
+    return render(request, '4_Colegio/gestionarAlumnos.html', context)
+
+@login_required
+def actualizar_curso_alumno(request, user_id):
+    if request.method == 'POST':
+        alumno = get_object_or_404(models.Usuario, id=user_id)
+        
+        if alumno.centro_educacional == request.user.centro_educacional:
+            curso_id = request.POST.get('nuevo_curso')
+            
+            if curso_id:
+                nuevo_curso_obj = get_object_or_404(models.Curso, id=curso_id)
+                alumno.curso = nuevo_curso_obj
+                alumno.save()
+                messages.success(request, f'Curso de {alumno.first_name} actualizado a {nuevo_curso_obj.nombre}.')
+        else:
+            messages.error(request, 'No autorizado.')
+            
+    return redirect('gestionarAlumnos')
+
+@login_required
+def crear_curso(request):
+    if request.method == 'POST':
+        tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
+        if tipo_usuario != 'colegio':
+            messages.error(request, 'Acceso denegado.')
+            return redirect('ver_perfil')
+
+        nombre_curso = request.POST.get('nombre_curso')
+        mi_colegio = request.user.centro_educacional
+
+        if nombre_curso:
+            curso_existe = models.Curso.objects.filter(
+                nombre__iexact=nombre_curso, 
+                centro_educacional=mi_colegio
+            ).exists()
+            
+            if curso_existe:
+                messages.warning(request, f'El curso "{nombre_curso}" ya existe en tu institución.')
+            else:
+                models.Curso.objects.create(
+                    nombre=nombre_curso,
+                    centro_educacional=mi_colegio
+                )
+                messages.success(request, f'Curso "{nombre_curso}" creado exitosamente.')
+        else:
+            messages.error(request, 'El nombre del curso no puede estar vacío.')
+
+    return redirect('gestionarAlumnos')
+
+@login_required
+def restablecerClaves(request):
+    tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
+    if tipo_usuario != 'colegio':
+        messages.error(request, 'Acceso denegado.')
+        return redirect('ver_perfil')
+
+    mi_colegio = request.user.centro_educacional
+    alumnos = models.Usuario.objects.filter(
+        centro_educacional=mi_colegio,
+        tipo_perfil__tipo_perfil__iexact='estudiante'
+    ).order_by('last_name')
+
+    query = request.GET.get('q', '')
+    if query:
+        alumnos = alumnos.filter(
+            Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(email__icontains=query)
+        )
+
+    context = {
+        'alumnos': alumnos,
+        'query': query
+    }
+    return render(request, '4_Colegio/restablecerClaves.html', context)
+
+@login_required
+def generar_clave_temporal(request, user_id):
+    if request.method == 'POST':
+        alumno = get_object_or_404(models.Usuario, id=user_id)
+        
+        if alumno.centro_educacional == request.user.centro_educacional:
+            caracteres = string.ascii_letters + string.digits
+            nueva_clave = ''.join(random.choice(caracteres) for i in range(8))
+            
+            alumno.set_password(nueva_clave)
+            alumno.save()
+            
+            messages.success(request, f'✅ ¡Éxito! La nueva contraseña temporal para {alumno.first_name} {alumno.last_name} es: {nueva_clave}')
+        else:
+            messages.error(request, 'No tienes permisos para modificar a este usuario.')
+            
+    return redirect('restablecerClaves')
+
+@login_required
+def gestionarEmpresas(request):
+    tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
+    if tipo_usuario != 'colegio':
+        messages.error(request, 'Acceso denegado.')
+        return redirect('ver_perfil')
+
+    mi_colegio = request.user.centro_educacional
+    
+    empresas = models.Usuario.objects.filter(
+        colegios_vinculados=mi_colegio,
+        tipo_perfil__tipo_perfil__iexact='empresa'
+    ).order_by('first_name')
+
+    query = request.GET.get('q', '')
+    if query:
+        empresas = empresas.filter(
+            Q(first_name__icontains=query) |
+            Q(email__icontains=query) |
+            Q(username__icontains=query)
+        )
+
+    empresas_disponibles = models.Usuario.objects.filter(
+        tipo_perfil__tipo_perfil__iexact='empresa'
+    ).exclude(colegios_vinculados=mi_colegio).order_by('first_name')
+
+    context = {
+        'empresas': empresas,
+        'empresas_disponibles': empresas_disponibles, # Lo enviamos al HTML
+        'query': query
+    }
+    return render(request, '4_Colegio/gestionarEmpresas.html', context)
+
+@login_required
+def vincular_empresa(request):
+    if request.method == 'POST':
+        tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
+        if tipo_usuario != 'colegio':
+            return redirect('ver_perfil')
+
+        mi_colegio = request.user.centro_educacional
+        empresa_id = request.POST.get('empresa_id') 
+
+        if empresa_id:
+            # Buscamos la empresa exacta por su ID
+            empresa_seleccionada = get_object_or_404(models.Usuario, id=empresa_id, tipo_perfil__tipo_perfil__iexact='empresa')
+            
+            # La vinculamos
+            empresa_seleccionada.colegios_vinculados.add(mi_colegio)
+            messages.success(request, f'¡Convenio establecido con {empresa_seleccionada.first_name}!')
+        else:
+            messages.error(request, 'No se seleccionó ninguna empresa.')
+
+    return redirect('gestionarEmpresas')
+
+@login_required
+def aprobarPracticas(request):
+    tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
+    if tipo_usuario != 'colegio':
+        return redirect('ver_perfil')
+
+    mi_colegio = request.user.centro_educacional
+    
+    # Traemos las ofertas enviadas a este colegio, ordenando las pendientes primero
+    ofertas = models.OfertaPractica.objects.filter(colegio=mi_colegio).order_by(
+        models.Case(
+            models.When(estado='Pendiente', then=0),
+            models.When(estado='Aprobada', then=1),
+            default=2
+        ),
+        '-fecha_creacion'
+    )
+
+    return render(request, '4_Colegio/aprobarPracticas.html', {'ofertas': ofertas})
+
+@login_required
+def cambiar_estado_oferta(request, oferta_id, nuevo_estado):
+    if request.method == 'POST':
+        oferta = get_object_or_404(models.OfertaPractica, id=oferta_id, colegio=request.user.centro_educacional)
+        if nuevo_estado in ['Aprobada', 'Rechazada']:
+            oferta.estado = nuevo_estado
+            oferta.save()
+            messages.success(request, f'La oferta "{oferta.titulo}" ha sido {nuevo_estado.lower()}.')
+    return redirect('aprobarPracticas')
+
+@login_required
+def metricasEmpresas(request):
+    tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
+    if tipo_usuario != 'colegio':
+        return redirect('ver_perfil')
+
+    mi_colegio = request.user.centro_educacional
+    
+    # Cálculos para el Dashboard
+    total_empresas = models.Usuario.objects.filter(colegios_vinculados=mi_colegio, tipo_perfil__tipo_perfil__iexact='empresa').count()
+    total_ofertas = models.OfertaPractica.objects.filter(colegio=mi_colegio).count()
+    ofertas_aprobadas = models.OfertaPractica.objects.filter(colegio=mi_colegio, estado='Aprobada').count()
+    cupos_totales = sum(oferta.cupos for oferta in models.OfertaPractica.objects.filter(colegio=mi_colegio, estado='Aprobada'))
+
+    context = {
+        'total_empresas': total_empresas,
+        'total_ofertas': total_ofertas,
+        'ofertas_aprobadas': ofertas_aprobadas,
+        'cupos_totales': cupos_totales,
+    }
+    return render(request, '4_Colegio/metricasEmpresas.html', context)
 
 
+@login_required
+def seguimientoPracticas(request):
+    mi_colegio = request.user.centro_educacional
+    practicas = models.ExperienciaLaboral.objects.filter(
+        usuario__centro_educacional=mi_colegio
+    ).select_related('usuario', 'empresa_registrada').order_by('-fecha_inicio')
+    
+    return render(request, '4_Colegio/seguimientoPracticas.html', {'practicas': practicas})
 
+@login_required
+def redEgresados(request):
+    mi_colegio = request.user.centro_educacional
+    egresados = models.Usuario.objects.filter(
+        centro_educacional=mi_colegio,
+        tipo_perfil__tipo_perfil__iexact='estudiante',
+        curso__isnull=True
+    ).order_by('last_name')
+    
+    return render(request, '4_Colegio/redEgresados.html', {'egresados': egresados})
 
+@login_required
+def gestionarEspecialidades(request):
+    mi_colegio = request.user.centro_educacional
+    if request.method == 'POST':
+        especialidades_ids = request.POST.getlist('especialidades')
+        mi_colegio.especialidades.set(especialidades_ids)
+        messages.success(request, "Especialidades actualizadas correctamente.")
+        return redirect('gestionarEspecialidades')
+    
+    todas_especialidades = models.Competencia.objects.filter(tipo_competencia='ESP')
+    mis_especialidades = mi_colegio.especialidades.all()
+    
+    return render(request, '4_Colegio/gestionarEspecialidades.html', {
+        'todas': todas_especialidades,
+        'mias': mis_especialidades
+    })
 
+@login_required
+def gestionarContenidoEducativo(request):
+    mi_colegio = request.user.centro_educacional
+    if request.method == 'POST':
+        titulo = request.POST.get('titulo')
+        descripcion = request.POST.get('descripcion')
+        url = request.POST.get('url_video')
+        models.ContenidoEducativo.objects.create(
+            colegio=mi_colegio,
+            titulo=titulo,
+            descripcion=descripcion,
+            url_video=url
+        )
+        messages.success(request, "Recurso educativo publicado para tus alumnos.")
+        
+    contenidos = models.ContenidoEducativo.objects.filter(colegio=mi_colegio).order_by('-fecha_subida')
+    return render(request, '4_Colegio/gestionarContenido.html', {'contenidos': contenidos})
 
+def exportarDatosExcel(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="alumnos_rel_plus.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow(['Nombre', 'Apellido', 'Email', 'Curso', 'Telefono'])
+    
+    alumnos = models.Usuario.objects.filter(centro_educacional=request.user.centro_educacional)
+    for a in alumnos:
+        writer.writerow([a.first_name, a.last_name, a.email, a.curso, a.telefono])
+    
+    return response
 
+@login_required
+def reporteEmpleabilidad(request):
+    tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
+    if tipo_usuario != 'colegio':
+        return redirect('ver_perfil')
 
+    mi_colegio = request.user.centro_educacional
+    
+    egresados = models.Usuario.objects.filter(
+        centro_educacional=mi_colegio,
+        tipo_perfil__tipo_perfil__iexact='estudiante',
+        curso__isnull=True
+    )
+    total_egresados = egresados.count()
+    
+    egresados_trabajando = egresados.filter(experiencias_como_estudiante__isnull=False).distinct().count()
+    
+    porcentaje = (egresados_trabajando * 100 // total_egresados) if total_egresados > 0 else 0
 
-
-
-
-
+    context = {
+        'total_egresados': total_egresados,
+        'egresados_trabajando': egresados_trabajando,
+        'porcentaje': porcentaje
+    }
+    return render(request, '4_Colegio/reporteEmpleabilidad.html', context)
 
 
 

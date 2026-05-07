@@ -1,0 +1,67 @@
+{% extends "0_Bases/3base.html" %}
+{% load static %}
+{% block title %}{{ request.user.first_name }} - Restablecer Contraseñas{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-6">
+            <h2 class="fw-bold text-danger"><i class="bi bi-key me-2"></i>Restablecer Claves</h2>
+            <p class="text-muted">Genera contraseñas temporales para estudiantes que hayan perdido el acceso.</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <form action="{% url 'restablecerClaves' %}" method="GET" class="d-inline-block w-75">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="q" value="{{ query }}" placeholder="Buscar por nombre o correo...">
+                    <button class="btn btn-dark" type="submit"><i class="bi bi-search"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="alert alert-warning border-0 shadow-sm mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <strong>Nota de Seguridad:</strong> Al generar una nueva contraseña, la clave anterior del estudiante dejará de funcionar inmediatamente. Pídele al estudiante que cambie su clave temporal desde su perfil una vez que inicie sesión.
+    </div>
+
+    <div class="card shadow-sm" style="border-radius: 15px;">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Estudiante</th>
+                            <th>Correo / Usuario</th>
+                            <th class="text-center">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in alumnos %}
+                        <tr>
+                            <td class="ps-4">
+                                <span class="fw-bold">{{ a.last_name }}, {{ a.first_name }}</span>
+                                <div class="text-muted small">{{ a.curso.nombre|default:"Sin curso" }}</div>
+                            </td>
+                            <td>{{ a.email|default:a.username }}</td>
+                            <td class="text-center">
+                                <form action="{% url 'generar_clave_temporal' a.id %}" method="POST" class="m-0">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                            onclick="return confirm('¿Seguro que deseas generar una nueva clave temporal para {{ a.first_name }}?');">
+                                        <i class="bi bi-arrow-clockwise me-1"></i> Generar Nueva Clave
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center py-5 text-muted">No se encontraron alumnos con ese criterio.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

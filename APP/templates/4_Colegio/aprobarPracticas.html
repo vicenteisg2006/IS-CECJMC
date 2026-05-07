@@ -1,0 +1,50 @@
+{% extends "0_Bases/3base.html" %}
+{% block title %}{{ request.user.first_name }} - Aprobar Prácticas{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h2 class="fw-bold mb-4"><i class="bi bi-ui-checks me-2 text-warning"></i>Aprobar Prácticas</h2>
+    
+    <div class="row">
+        {% for o in ofertas %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card shadow-sm h-100 border-0" style="border-radius: 15px;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge 
+                            {% if o.estado == 'Pendiente' %}bg-warning text-dark
+                            {% elif o.estado == 'Aprobada' %}bg-success
+                            {% else %}bg-danger{% endif %}">
+                            {{ o.estado }}
+                        </span>
+                        <small class="text-muted">{{ o.fecha_creacion|date:"d M Y" }}</small>
+                    </div>
+                    <h5 class="fw-bold">{{ o.titulo }}</h5>
+                    <h6 class="text-muted"><i class="bi bi-building me-1"></i>{{ o.empresa.first_name }}</h6>
+                    <p class="small mt-3 text-truncate" style="max-height: 40px;">{{ o.descripcion }}</p>
+                    <div class="fw-bold small text-primary"><i class="bi bi-people-fill me-1"></i>Cupos: {{ o.cupos }}</div>
+                </div>
+                
+                {% if o.estado == 'Pendiente' %}
+                <div class="card-footer bg-white border-0 pb-3 d-flex justify-content-between">
+                    <form action="{% url 'cambiar_estado_oferta' o.id 'Rechazada' %}" method="POST" class="w-50 me-1">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger w-100 btn-sm">Rechazar</button>
+                    </form>
+                    <form action="{% url 'cambiar_estado_oferta' o.id 'Aprobada' %}" method="POST" class="w-50 ms-1">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success w-100 btn-sm">Aprobar</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-inbox fs-1 text-muted"></i>
+            <p class="text-muted mt-2">No hay ofertas de práctica registradas aún.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

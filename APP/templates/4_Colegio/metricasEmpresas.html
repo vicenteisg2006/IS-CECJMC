@@ -1,0 +1,47 @@
+{% extends "0_Bases/3base.html" %}
+{% block title %}{{ request.user.first_name }} - Métricas{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h2 class="fw-bold mb-4"><i class="bi bi-graph-up-arrow me-2 text-info"></i>Métricas de Convenios</h2>
+    
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white border-0 shadow-sm" style="border-radius: 15px;">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-buildings fs-1 opacity-50 mb-2"></i>
+                    <h2 class="fw-bold display-5">{{ total_empresas }}</h2>
+                    <p class="mb-0">Empresas Vinculadas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white border-0 shadow-sm" style="border-radius: 15px;">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-briefcase fs-1 opacity-50 mb-2"></i>
+                    <h2 class="fw-bold display-5">{{ ofertas_aprobadas }}</h2>
+                    <p class="mb-0">Ofertas Aprobadas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white border-0 shadow-sm" style="border-radius: 15px;">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-people fs-1 opacity-50 mb-2"></i>
+                    <h2 class="fw-bold display-5">{{ cupos_totales }}</h2>
+                    <p class="mb-0">Cupos Disponibles</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-secondary text-white border-0 shadow-sm" style="border-radius: 15px;">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-file-earmark-text fs-1 opacity-50 mb-2"></i>
+                    <h2 class="fw-bold display-5">{{ total_ofertas }}</h2>
+                    <p class="mb-0">Total Histórico</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

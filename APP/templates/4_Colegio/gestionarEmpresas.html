@@ -1,0 +1,125 @@
+{% extends "0_Bases/3base.html" %}
+{% load static %}
+{% block title %}{{ request.user.first_name }} - Red de Empresas{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col-lg-6 col-md-12">
+            <h2 class="fw-bold"><i class="bi bi-buildings me-2 text-primary"></i>Red de Empresas</h2>
+            <p class="text-muted">Administra tus convenios actuales o añade nuevos socios a la red.</p>
+        </div>
+        <div class="col-lg-6 col-md-12 text-lg-end">
+            <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#modalAnadirEmpresa">
+                <i class="bi bi-patch-plus me-1"></i> Añadir Empresa
+            </button>
+
+            <form action="{% url 'gestionarEmpresas' %}" method="GET" class="d-inline-block align-middle" style="max-width: 250px;">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="q" value="{{ query }}" placeholder="Buscar...">
+                    <button class="btn btn-dark" type="submit"><i class="bi bi-search"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm" style="border-radius: 15px;">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Razón Social / Nombre</th>
+                            <th>Contacto Oficial</th>
+                            <th>Teléfono</th>
+                            <th class="text-center">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for emp in empresas %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3 border" style="width: 45px; height: 45px;">
+                                        <i class="bi bi-building fs-5 text-secondary"></i>
+                                    </div>
+                                    <div>
+                                        <span class="fw-bold d-block">{{ emp.first_name }} {{ emp.last_name }}</span>
+                                        <small class="text-muted"><i class="bi bi-geo-alt-fill me-1"></i>{{ emp.direccion|default:"Dirección no registrada" }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <a href="mailto:{{ emp.email|default:emp.username }}" class="text-decoration-none">
+                                    {{ emp.email|default:emp.username }}
+                                </a>
+                            </td>
+                            <td>{{ emp.telefono|default:"No disponible" }}</td>
+                            <td class="text-center">
+                                {% if emp.is_active %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success">Activo</span>
+                                {% else %}
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger">Suspendido</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5">
+                                <div class="text-muted mb-3">
+                                    <i class="bi bi-building-slash fs-1"></i>
+                                </div>
+                                <h6 class="fw-bold text-muted">No hay empresas registradas</h6>
+                                <p class="text-muted small">Aún no hay empresas vinculadas a tu institución en el sistema.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalAnadirEmpresa" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 15px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Vincular Empresa a la Red</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'vincular_empresa' %}" method="POST">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p class="text-muted small mb-4">
+                        Selecciona una empresa del directorio global de REL+ para establecer un convenio con tu institución.
+                    </p>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-muted small">Directorio de Empresas</label>
+                        <select name="empresa_id" class="form-select" required>
+                            <option value="" disabled selected>Selecciona una empresa de la red...</option>
+                            
+                            {% for emp in empresas_disponibles %}
+                                <option value="{{ emp.id }}">{{ emp.first_name }} ({{ emp.email }})</option>
+                            {% empty %}
+                                <option value="" disabled>No hay más empresas disponibles en la red.</option>
+                            {% endfor %}
+                            
+                        </select>
+                    </div>
+
+                    <div class="alert alert-info border-0 small py-2 mt-3">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Si la empresa que buscas no está en esta lista, debes registrarla primero desde tu panel de <strong>Moderación</strong>.
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Buscar y Vincular</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

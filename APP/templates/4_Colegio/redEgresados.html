@@ -1,0 +1,28 @@
+{% extends "0_Bases/3base.html" %}
+{% block title %}Red de Egresados{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h2 class="fw-bold mb-4"><i class="bi bi-mortarboard me-2 text-success"></i>Red de Egresados</h2>
+    <p class="text-muted">Directorio de estudiantes que ya han finalizado su educación en el centro.</p>
+    
+    <div class="row g-4">
+        {% for egresado in egresados %}
+        <div class="col-md-4 col-lg-3">
+            <div class="card shadow-sm h-100 border-0 text-center" style="border-radius: 15px;">
+                <div class="card-body">
+                    <img src="{{ egresado.get_avatar }}" class="rounded-circle mb-3 border" width="80" height="80" style="object-fit: cover;">
+                    <h6 class="fw-bold mb-1">{{ egresado.first_name }} {{ egresado.last_name }}</h6>
+                    <small class="text-muted d-block mb-3">{{ egresado.email }}</small>
+                    <a href="mailto:{{ egresado.email }}" class="btn btn-outline-success btn-sm w-100">Contactar</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <p class="text-muted">Aún no hay egresados registrados en tu institución.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

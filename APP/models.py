@@ -39,6 +39,8 @@ class CentroEducacional(models.Model):
     nombre = models.CharField(max_length=200)
     direccion = models.CharField(max_length=255)
 
+    especialidades = models.ManyToManyField('Competencia', related_name='colegios_que_la_imparten', blank=True)
+
     def __str__(self):
         return self.nombre
 
@@ -64,6 +66,13 @@ class Competencia(models.Model):
     def __str__(self):
         return f"{self.get_tipo_competencia_display()} - {self.competencia}"
 
+class Curso(models.Model):
+    nombre = models.CharField(max_length=50)
+    centro_educacional = models.ForeignKey(CentroEducacional, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.nombre} ({self.centro_educacional.nombre})"
+
 
 #         #######################################
 #       ############## TABLA USUARIO ###############
@@ -74,10 +83,8 @@ class Usuario(AbstractUser):
     telefono = models.CharField(max_length=20, blank=True, null=True)
     direccion = models.CharField(max_length=255, blank=True, null=True)
     email = models.EmailField(max_length=255, blank=True, null=True)
-    # avatar_url = models.URLField(max_length=500, blank=True) # Ideal para Cloudflare
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     bio = models.TextField(blank=True, null=True)
-    curso = models.CharField(max_length=100, blank=True, null=True)
 
     notif_email = models.BooleanField(default=True)
     notif_mensajes = models.BooleanField(default=True)
@@ -104,7 +111,9 @@ class Usuario(AbstractUser):
     region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True)
     comuna = models.ForeignKey(Comuna, on_delete=models.SET_NULL, null=True)
     centro_educacional = models.ForeignKey(CentroEducacional, on_delete=models.SET_NULL, blank=True, null=True)
+    colegios_vinculados = models.ManyToManyField('CentroEducacional', related_name='empresas_asociadas', blank=True) #para las empresas
     competencias = models.ManyToManyField(Competencia, related_name='usuarios_competencia', blank=True)
+    curso = models.ForeignKey(Curso, on_delete=models.SET_NULL, null=True, blank=True)
 
     # Vista mas ordenada para el admin
     def __str__(self):
@@ -244,3 +253,37 @@ class Notificacion(models.Model):
     class Meta:
         verbose_name = "Notificación"
         verbose_name_plural = "Notificaciones"
+
+class OfertaPractica(models.Model):
+    ESTADOS_APROBACION = [
+        ('Pendiente', 'Pendiente'),
+        ('Aprobada', 'Aprobada'),
+        ('Rechazada', 'Rechazada'),
+    ]
+    
+    # Relaciones
+    empresa = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='practicas_creadas')
+    colegio = models.ForeignKey(CentroEducacional, on_delete=models.CASCADE, related_name='practicas_recibidas')
+    
+    # Datos de la oferta
+    titulo = models.CharField(max_length=200)
+    descripcion = models.TextField()
+    cupos = models.PositiveIntegerField(default=1)
+    
+    # Control del colegio
+    estado = models.CharField(max_length=20, choices=ESTADOS_APROBACION, default='Pendiente')
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.titulo} - {self.empresa.first_name} ({self.estado})"
+    
+class ContenidoEducativo(models.Model):
+    colegio = models.ForeignKey(CentroEducacional, on_delete=models.CASCADE, related_name='material_educativo')
+    titulo = models.CharField(max_length=200)
+    descripcion = models.TextField()
+    url_video = models.URLField(blank=True, null=True, help_text="Enlace de YouTube o Vimeo")
+    archivo = models.FileField(upload_to='recursos_educativos/', blank=True, null=True)
+    fecha_subida = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.titulo} - {self.colegio.nombre}"

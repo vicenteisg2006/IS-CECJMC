@@ -1,0 +1,75 @@
+{% extends "0_Bases/3base.html" %}
+{% block title %}Material Educativo{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2 class="fw-bold"><i class="bi bi-play-btn me-2 text-danger"></i>Material Educativo</h2>
+            <p class="text-muted">Sube recursos, guías o videos para preparar a tus estudiantes para el mundo laboral.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalSubirContenido">
+                <i class="bi bi-cloud-arrow-up me-2"></i>Subir Recurso
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for contenido in contenidos %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0" style="border-radius: 15px;">
+                <div class="card-body">
+                    <h5 class="fw-bold">{{ contenido.titulo }}</h5>
+                    <small class="text-muted d-block mb-3"><i class="bi bi-calendar3 me-1"></i>{{ contenido.fecha_subida|date:"d M Y" }}</small>
+                    <p class="small">{{ contenido.descripcion|truncatewords:20 }}</p>
+                    
+                    {% if contenido.url_video %}
+                    <a href="{{ contenido.url_video }}" target="_blank" class="btn btn-outline-danger btn-sm w-100 mt-auto">
+                        <i class="bi bi-youtube me-1"></i> Ver Video
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5 text-muted">
+            <i class="bi bi-collection-play fs-1"></i>
+            <p class="mt-2">Aún no has subido material educativo para tus alumnos.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="modal fade" id="modalSubirContenido" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 15px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Nuevo Recurso Educativo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{% url 'gestionarContenidoEducativo' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-muted small">Título del Recurso</label>
+                        <input type="text" name="titulo" class="form-control" placeholder="Ej: Cómo armar un buen CV" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-muted small">Descripción</label>
+                        <textarea name="descripcion" class="form-control" rows="3" placeholder="Breve resumen del contenido..." required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-muted small">URL del Video (Opcional)</label>
+                        <input type="url" name="url_video" class="form-control" placeholder="Enlace de YouTube o Vimeo">
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Publicar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

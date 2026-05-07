@@ -1,0 +1,48 @@
+{% extends "0_Bases/3base.html" %}
+{% block title %}Seguimiento de Prácticas{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h2 class="fw-bold mb-4"><i class="bi bi-geo-alt me-2 text-primary"></i>Seguimiento de Prácticas</h2>
+    
+    <div class="card shadow-sm border-0" style="border-radius: 15px;">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Alumno</th>
+                            <th>Empresa / Institución</th>
+                            <th>Fecha Inicio</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in practicas %}
+                        <tr>
+                            <td class="ps-4 fw-bold">{{ p.usuario.first_name }} {{ p.usuario.last_name }}</td>
+                            <td><i class="bi bi-building me-2 text-muted"></i>{{ p.obtener_nombre_empresa }}</td>
+                            <td>{{ p.fecha_inicio|date:"d M Y" }}</td>
+                            <td>
+                                {% if p.fecha_termino %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary">Finalizada</span>
+                                {% else %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success">En curso</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <i class="bi bi-journal-x fs-1"></i>
+                                <p class="mt-2">No hay registros de prácticas activos.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

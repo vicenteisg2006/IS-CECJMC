@@ -28,6 +28,26 @@ urlpatterns = [
     path('administracion/moderacion-perfil/suspender-usuario/<int:user_id>/', views.suspender_usuario, name='suspender_usuario'),
     path('administracion/moderacion-contenido/', views.moderacionContenido, name='moderacionContenido'),
     path('administracion/moderacion-contenido/eliminar-post/<int:post_id>/', views.eliminar_post_colegio, name='eliminar_post_colegio'),
+
+    path('administracion/alumnos/', views.gestionarAlumnos, name='gestionarAlumnos'),
+    path('administracion/alumnos/actualizar-curso/<int:user_id>/', views.actualizar_curso_alumno, name='actualizar_curso_alumno'),
+    path('administracion/alumnos/crear-curso/', views.crear_curso, name='crear-curso'),
+    path('administracion/alumnos/restablecer-claves/', views.restablecerClaves, name='restablecerClaves'),
+    path('administracion/alumnos/generar-clave/<int:user_id>/', views.generar_clave_temporal, name='generar_clave_temporal'),
+
+    path('administracion/empresas/', views.gestionarEmpresas, name='gestionarEmpresas'),
+    path('administracion/empresas/vincular/', views.vincular_empresa, name='vincular_empresa'),
+    path('administracion/empresas/aprobar-practicas/', views.aprobarPracticas, name='aprobarPracticas'),
+    path('administracion/empresas/cambiar-estado-oferta/<int:oferta_id>/<str:nuevo_estado>/', views.cambiar_estado_oferta, name='cambiar_estado_oferta'),
+    path('administracion/empresas/metricas/', views.metricasEmpresas, name='metricasEmpresas'),
+
+    path('administracion/red/seguimiento/', views.seguimientoPracticas, name='seguimientoPracticas'),
+    path('administracion/red/egresados/', views.redEgresados, name='redEgresados'),
+    path('administracion/red/reporte/', views.reporteEmpleabilidad, name='reporteEmpleabilidad'),
+
+    path('administracion/config/especialidades/', views.gestionarEspecialidades, name='gestionarEspecialidades'),
+    path('administracion/config/contenido/', views.gestionarContenidoEducativo, name='gestionarContenidoEducativo'),
+    path('administracion/config/exportar/', views.exportarDatosExcel, name='exportarDatosExcel'),
     
     #Vistas Empresa
     path('business/', views.business, name='business'), #business
@@ -41,7 +61,7 @@ urlpatterns = [
     path('mi-perfil/cambiar-password/', views.cambiar_password, name='cambiar_password'),
     path('mi-perfil/configurar-notificaciones/', views.configurar_notificaciones, name='configurar_notificaciones'),
     path('mi-perfil/configurar-privacidad/', views.configurar_privacidad, name='configurar_privacidad'),
-path('mi-perfil/descargar-datos/', views.descargar_datos_json, name='descargar_datos_json'),
+    path('mi-perfil/descargar-datos/', views.descargar_datos_json, name='descargar_datos_json'),
 
 
     path('testalert/', views.testalert, name='testalert')
