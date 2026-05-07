@@ -9,7 +9,6 @@ from botocore.exceptions import ClientError
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-ENVIRONMENT = os.getenv('ENVIRONMENT', 'production')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
@@ -26,16 +25,21 @@ ENVIRONMENT = os.getenv('ENVIRONMENT', 'production')
 # MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = ENVIRONMENT == 'local'
 
-ALLOWED_HOSTS = ['*']
-
+ALLOWED_HOSTS = [
+    'relplus.cloud-ip.cc',
+    'www.relplus.cloud-ip.cc',
+    '35.170.207.155',         # Your Elastic IP
+    '127.0.0.1',              # Localhost (Nginx uses this to talk to Gunicorn)
+]
 
 # SECURITY WARNING: keep the secret key used in production secret!
 env_path = os.path.join(BASE_DIR, '.env')
 load_dotenv(env_path)
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'production')
 SECRET_KEY = os.getenv('SECRET_KEY')
 
+DEBUG = ENVIRONMENT == 'local'
 # Application definition
 
 INSTALLED_APPS = [
@@ -84,7 +88,11 @@ WSGI_APPLICATION = 'PROJECT.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
+# print(ENVIRONMENT)
+# print(ENVIRONMENT == 'production')
+# print(ENVIRONMENT == 'local')
 if ENVIRONMENT == 'local':
+    print('do we get here ?')
     # Local laptops don't use AWS. They use a simple, local SQLite file.
     # This means teammates don't even need to install MySQL on their computers!
     DATABASES = {
