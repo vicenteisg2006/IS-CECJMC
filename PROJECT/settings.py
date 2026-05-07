@@ -9,7 +9,7 @@ from botocore.exceptions import ClientError
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'production')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = ENVIRONMENT == 'local'
 
 ALLOWED_HOSTS = ['*']
 
@@ -84,48 +84,61 @@ WSGI_APPLICATION = 'PROJECT.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
-def get_db_secret():
-    secret_name = "rds!db-5ee031ba-6a62-4897-8ecf-36a856041257" # Put the exact name of your secret from AWS here
-    region_name = "us-east-1"             # Change if you are in a different region
-
-    # Create a Secrets Manager client
-    session = boto3.session.Session()
-    client = session.client(
-        service_name='secretsmanager',
-        region_name=region_name
-    )
-
-    try:
-        get_secret_value_response = client.get_secret_value(
-            SecretId=secret_name
-        )
-    except ClientError as e:
-        # If it fails, print the error so you can debug
-        raise e
-
-    # Decrypts secret using the associated KMS key and parses the JSON
-    secret = get_secret_value_response['SecretString']
-    return json.loads(secret)
-
-# Call the function to get the dictionary of credentials
-try:
-    db_credentials = get_db_secret()
-    print("AWS RETURNED THIS:", db_credentials)  # <--- ADD THIS LINE
-except Exception as e:
-    print(f"Warning: Could not load Secrets Manager. {e}")
-    db_credentials = {}
-
-DATABASES = {
+if ENVIRONMENT == 'local':
+    # Local laptops don't use AWS. They use a simple, local SQLite file.
+    # This means teammates don't even need to install MySQL on their computers!
+    DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'relplus_db', 
-        'USER': db_credentials.get('username'),
-        'PASSWORD': db_credentials.get('password'),
-        'HOST': 'relplus-db.cwx40yocw76g.us-east-1.rds.amazonaws.com',
-        'PORT': '3306',
+        'ENGINE': os.getenv('DB_ENGINE'),
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
+else:
+    def get_db_secret():
+        secret_name = "rds!db-5ee031ba-6a62-4897-8ecf-36a856041257" # Put the exact name of your secret from AWS here
+        region_name = "us-east-1"             # Change if you are in a different region
+
+        # Create a Secrets Manager client
+        session = boto3.session.Session()
+        client = session.client(
+            service_name='secretsmanager',
+            region_name=region_name
+        )
+
+        try:
+            get_secret_value_response = client.get_secret_value(
+                SecretId=secret_name
+            )
+        except ClientError as e:
+            # If it fails, print the error so you can debug
+            raise e
+
+        # Decrypts secret using the associated KMS key and parses the JSON
+        secret = get_secret_value_response['SecretString']
+        return json.loads(secret)
+
+    # Call the function to get the dictionary of credentials
+    try:
+        db_credentials = get_db_secret()
+        print("AWS RETURNED THIS:", db_credentials)  # <--- ADD THIS LINE
+    except Exception as e:
+        print(f"Warning: Could not load Secrets Manager. {e}")
+        db_credentials = {}
+
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'relplus_db', 
+            'USER': db_credentials.get('username'),
+            'PASSWORD': db_credentials.get('password'),
+            'HOST': 'relplus-db.cwx40yocw76g.us-east-1.rds.amazonaws.com',
+            'PORT': '3306',
+        }
+    }
 
 
 # Password validation
