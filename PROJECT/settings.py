@@ -117,8 +117,8 @@ DATABASES = {
         'NAME': 'relplus_db', 
         'USER': db_credentials.get('username'),
         'PASSWORD': db_credentials.get('password'),
-        'HOST': db_credentials.get('host'),
-        'PORT': db_credentials.get('port', '3306'),
+        'HOST': 'relplus-db.cwx40yocw76g.us-east-1.rds.amazonaws.com',
+        'PORT': '3306',
     }
 }
 
