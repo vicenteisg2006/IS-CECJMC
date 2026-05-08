@@ -65,18 +65,18 @@ class TipoCompetencia(models.TextChoices):
     OFICIO = 'oficio','Oficio'
 
 class Competencia(models.Model):
-    tipo_competencia = models.ForeignKey(TipoCompetencia, on_delete=models.SET_NULL, null=True)
+    tipo_competencia = models.CharField(TipoCompetencia, max_length=15, on_delete=models.SET_NULL, null=True, choices=TipoCompetencia.choices)
     competencia = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"{self.tipo_competencia} - {self.competencia}"
+        return f"{TipoCompetencia.tipo_competencia} - {self.competencia}"
 
 class TipoHabilidad(models.TextChoices):
     TECNICA = 'tecnica','Técnica'
     INTERPERSONAL = 'interpersonal','Interpersonal'
 
 class Habilidad(models.Model):
-    tipo_habilidad = models.ForeignKey(TipoHabilidad, on_delete=models.SET_NULL, null=True)
+    tipo_habilidad = models.CharField(TipoHabilidad, max_length=15, on_delete=models.SET_NULL, null=True, choices=TipoHabilidad.choices)
     habilidad = models.CharField(max_length=255)
 
     def __str__(self):
