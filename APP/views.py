@@ -571,8 +571,8 @@ def aprobarPracticas(request):
     # Traemos las ofertas enviadas a este colegio, ordenando las pendientes primero
     ofertas = models.OfertaLaboral.objects.filter(colegio=mi_colegio, es_practica=True).order_by(
         models.Case(
-            models.When(estado_verificacion='pendiente', then=0),
-            models.When(estado_verificacion='aprobado', then=1),
+            models.When(estado_verificacion=models.EstadoVerificacion.PENDIENTE, then=0),
+            models.When(estado_verificacion=models.EstadoVerificacion.APROBADO, then=1),
             default=2
         ),
         '-fecha_creacion'
@@ -583,8 +583,8 @@ def aprobarPracticas(request):
 @login_required
 def cambiar_estado_oferta(request, oferta_id, nuevo_estado):
     if request.method == 'POST':
-        oferta = get_object_or_404(models.OfertaPractica, id=oferta_id, colegio=request.user.centro_educacional)
-        if nuevo_estado in ['Aprobada', 'Rechazada']:
+        oferta = get_object_or_404(models.OfertaLaboral, id=oferta_id, colegio=request.user.centro_educacional)
+        if nuevo_estado in [models.EstadoVerificacion.APROBADO, models.EstadoVerificacion.RECHAZADO]:
             oferta.estado = nuevo_estado
             oferta.save()
             messages.success(request, f'La oferta "{oferta.titulo}" ha sido {nuevo_estado.lower()}.')
