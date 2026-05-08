@@ -23,7 +23,7 @@ def perfil_requerido(perfil_permitido):
         @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
             # Obtenemos el nombre del perfil desde el modelo TipoPerfil
-            rol_actual = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ""
+            rol_actual = request.user.tipo_perfil.lower() if request.user.tipo_perfil else ""
             
             if rol_actual == perfil_permitido.lower():
                 return view_func(request, *args, **kwargs)
@@ -50,7 +50,7 @@ def login(request):
             auth_login(request, user)
 
             try:
-                tipo = user.tipo_perfil.tipo_perfil.lower() if user.tipo_perfil else ""
+                tipo = user.tipo_perfil.lower() if user.tipo_perfil else ""
 
                 if tipo == "alumno" or tipo == "estudiante":
                     return redirect("student")
