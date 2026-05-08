@@ -65,7 +65,7 @@ class TipoCompetencia(models.TextChoices):
     OFICIO = 'oficio','Oficio'
 
 class Competencia(models.Model):
-    tipo_competencia = models.CharField(TipoCompetencia, max_length=15, on_delete=models.SET_NULL, null=True, choices=TipoCompetencia.choices)
+    tipo_competencia = models.CharField(TipoCompetencia, max_length=15, null=True, choices=TipoCompetencia.choices)
     competencia = models.CharField(max_length=255)
 
     def __str__(self):
@@ -76,7 +76,7 @@ class TipoHabilidad(models.TextChoices):
     INTERPERSONAL = 'interpersonal','Interpersonal'
 
 class Habilidad(models.Model):
-    tipo_habilidad = models.CharField(TipoHabilidad, max_length=15, on_delete=models.SET_NULL, null=True, choices=TipoHabilidad.choices)
+    tipo_habilidad = models.CharField(TipoHabilidad, max_length=15, null=True, choices=TipoHabilidad.choices)
     habilidad = models.CharField(max_length=255)
 
     def __str__(self):
@@ -123,10 +123,10 @@ class Usuario(AbstractUser):
         return '/static/images/profilepic1.jpg'
 
     # Llaves Foráneas (Foreign Keys)
-    tipo_perfil = models.ForeignKey(TipoPerfil, on_delete=models.SET_NULL, null=True)
+    tipo_perfil = models.CharField(TipoPerfil, choices=TipoPerfil.choices)
     region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True)
     comuna = models.ForeignKey(Comuna, on_delete=models.SET_NULL, null=True)
-    centro_educacional = models.ForeignKey(CentroEducacional, on_delete=models.SET_NULL, blank=True, null=True)
+    centro_educacional = models.ForeignKey(CentroEducacional, on_delete=models.SET_NULL)
     colegios_vinculados = models.ManyToManyField('CentroEducacional', related_name='empresas_asociadas', blank=True)
     competencias = models.ManyToManyField(Competencia, related_name='usuarios_competencia', blank=True, through='CompetenciaEstudiante')
     curso = models.ForeignKey(Curso, on_delete=models.SET_NULL, null=True, blank=True)
@@ -157,19 +157,19 @@ class ObtencionCertificado(models.Model):
     fecha_obtencion = models.DateField()
     fecha_expiracion = models.DateField(null=True, blank=True)
     url = models.URLField(max_length=500, blank=True)
-    estado_verificacion = models.CharField(EstadoVerificacion, on_delete=models.SET_NULL, null=True, choices=EstadoVerificacion.choices)
+    estado_verificacion = models.CharField(EstadoVerificacion, null=True, choices=EstadoVerificacion.choices)
 
 class HabilidadUsuario(models.Model):
     habilidad = models.ForeignKey(Habilidad, on_delete=models.CASCADE)
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     competencia = models.CharField(max_length=100)
-    estado_verificacion = models.CharField(EstadoVerificacion, on_delete=models.SET_NULL, null=True, choices=EstadoVerificacion.choices)
+    estado_verificacion = models.CharField(EstadoVerificacion, null=True, choices=EstadoVerificacion.choices)
 
 class CompetenciaEstudiante(models.Model):
     competencia = models.ForeignKey(Competencia, on_delete=models.CASCADE)
     estudiante = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     fecha_registro = models.DateField(auto_now_add=True)
-    estado_verificacion = models.CharField(EstadoVerificacion, on_delete=models.SET_NULL, null=True, choices=EstadoVerificacion.choices)
+    estado_verificacion = models.CharField(EstadoVerificacion, null=True, choices=EstadoVerificacion.choices)
 
 class ExperienciaLaboral(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='experiencias_como_estudiante')
@@ -180,7 +180,7 @@ class ExperienciaLaboral(models.Model):
     fecha_termino = models.DateField(null=True, blank=True)
     horas_trabajadas = models.IntegerField(null=True, blank=True)
     es_practica = models.BooleanField(default=False)
-    estado_verificacion = models.CharField(EstadoVerificacion, on_delete=models.SET_NULL, null=True, choices=EstadoVerificacion.choices)
+    estado_verificacion = models.CharField(EstadoVerificacion, null=True, choices=EstadoVerificacion.choices)
 
     @property
     def obtener_nombre_empresa(self):
@@ -209,8 +209,8 @@ class OfertaLaboral(models.Model):
     sueldo = models.DecimalField(max_digits=10, decimal_places=0, null=True, blank=True)
     modalidad = models.CharField(max_length=100)
     ubicacion = models.CharField(max_length=255)
-    estado_oferta = models.CharField(EstadoOferta, on_delete=models.SET_NULL, null=True, choices=EstadoOferta.choices)
-    estado_verificacion = models.CharField(EstadoVerificacion, on_delete=models.SET_NULL, null=True, choices=EstadoVerificacion.choices)
+    estado_oferta = models.CharField(EstadoOferta, null=True, choices=EstadoOferta.choices)
+    estado_verificacion = models.CharField(EstadoVerificacion, null=True, choices=EstadoVerificacion.choices)
 
     requisitos_habilidad = models.ManyToManyField(Habilidad, related_name='ofertas', blank=True)
     requisitos_competencia = models.ManyToManyField(Competencia, related_name='ofertas_relacionadas', blank=True)
@@ -219,7 +219,7 @@ class Postulacion(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='postulaciones')
     oferta_laboral = models.ForeignKey(OfertaLaboral, on_delete=models.CASCADE, related_name='postulantes')
     fecha_postulacion = models.DateTimeField(auto_now_add=True)
-    estado_solicitud = models.CharField(EstadoSolicitud, on_delete=models.SET_NULL, null=True, choices=EstadoSolicitud.choices)
+    estado_solicitud = models.CharField(EstadoSolicitud, null=True, choices=EstadoSolicitud.choices)
 
 class Post(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='posts')
@@ -254,7 +254,7 @@ class Conexion(models.Model):
     solicitante = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='conexiones_enviadas')
     receptor = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='conexiones_recibidas')
     fecha_creacion = models.DateTimeField(auto_now_add=True)
-    estado_solicitud = models.CharField(EstadoSolicitud, on_delete=models.SET_NULL, null=True, choices=EstadoSolicitud.choices)
+    estado_solicitud = models.CharField(EstadoSolicitud, null=True, choices=EstadoSolicitud.choices)
 
 class Notificacion(models.Model):
     receptor = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='notificaciones_recibidas')
