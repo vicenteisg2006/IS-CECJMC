@@ -1,22 +1,41 @@
-from urllib import request
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout, update_session_auth_hash
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse, JsonResponse
+from django.contrib import messages
+from django.db.models import Q
+from functools import wraps
+from urllib import request
+import pandas as pd
 from . import models
 import openpyxl
-import pandas as pd
-from django.db.models import Q
-import string
 import random
+import string
 import csv
 
 # ===========================================================
 #                                MEDIDAS DE SEGURIDAD
 # ===========================================================
 
+
+def perfil_requerido(perfil_permitido):
+    def decorator(view_func):
+        @wraps(view_func)
+        def _wrapped_view(request, *args, **kwargs):
+            # Obtenemos el nombre del perfil desde el modelo TipoPerfil
+            rol_actual = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ""
+            
+            if rol_actual == perfil_permitido.lower():
+                return view_func(request, *args, **kwargs)
+            
+            messages.error(request, f"Acceso denegado. Esta zona es solo para {perfil_permitido}.")
+            return redirect('ver_perfil')
+        return _wrapped_view
+    return decorator
+
+
 @login_required(login_url='/') 
+@perfil_requerido('estudiante')
 def student(request):
     post = models.Post.objects.all().order_by('-fecha_publicacion').select_related('usuario')
     return render(request, "2_Estudiante/student.html", 
@@ -25,6 +44,7 @@ def student(request):
                   })
 
 @login_required(login_url='/')
+@perfil_requerido('colegio')
 def school(request):
     post = models.Post.objects.all().order_by('-fecha_publicacion').select_related('usuario')
     return render(request, "4_Colegio/school.html", 
@@ -33,6 +53,7 @@ def school(request):
                   })
 
 @login_required(login_url='/')
+@perfil_requerido('empresa')
 def business(request):
     post = models.Post.objects.all().order_by('-fecha_publicacion').select_related('usuario')
     return render(request, "3_Empresa/business.html", 
