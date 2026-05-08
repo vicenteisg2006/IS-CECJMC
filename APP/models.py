@@ -212,7 +212,7 @@ class OfertaLaboral(models.Model):
     modalidad = models.CharField(max_length=100)
     ubicacion = models.CharField(max_length=255)
     estado_oferta = models.CharField(EstadoOferta, null=True, choices=EstadoOferta.choices, max_length=20)
-    estado_verificacion = models.CharField(EstadoVerificacion, null=True, choices=EstadoVerificacion.choices, max_length=20)
+    estado_verificacion = models.CharField(EstadoVerificacion, null=True, choices=EstadoVerificacion.choices, max_length=20, default=EstadoVerificacion.PENDIENTE)
 
     requisitos_habilidad = models.ManyToManyField(Habilidad, related_name='ofertas', blank=True)
     requisitos_competencia = models.ManyToManyField(Competencia, related_name='ofertas_relacionadas', blank=True)

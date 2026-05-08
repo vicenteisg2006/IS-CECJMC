@@ -208,8 +208,21 @@ def business(request):
 @login_required
 @perfil_requerido('empresa')
 def dashboard(request):
-    return render(request, "3_Empresa/dashboard.html")
+    empresa = request.user
+    
+    colegios_vinculados = empresa.colegios_vinculados.all()
+    
+    ultimas_ofertas = models.OfertaLaboral.objects.filter(
+        empresa=empresa, 
+        es_practica=True
+    ).order_by('-fecha_publicacion')[:5]
 
+    context = {
+        'colegios': colegios_vinculados,
+        'ofertas': ultimas_ofertas,
+    }
+    
+    return render(request, "3_Empresa/dashboard.html", context)
 #
 
 

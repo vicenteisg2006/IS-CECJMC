@@ -1,13 +1,81 @@
-<!-- LLamada a Base  -->
-{% extends "0_Bases/2base.html" %}
-{% load static %}
-{% block title %}{{ request.user.first_name }}{% endblock %}
+{% extends "0_Bases/3base.html" %}
+{% block title %}Dashboard Empresa - {{ request.user.first_name }}{% endblock %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-lg-8 col-md-8 mb-4">
-            <h2>Panel de Administración</h2>
-            <p>Aquí puedes gestionar las funciones y configuraciones de tu empresa.</p>
+<div class="container-fluid py-4">
+    
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold"><i class="bi bi-building me-2 text-primary"></i>Panel Corporativo</h2>
+            <p class="text-muted">Bienvenido, {{ request.user.first_name }}. Gestiona tus convenios y ofertas de práctica desde aquí.</p>
         </div>
     </div>
+
+    <div class="card shadow-sm border-0" style="border-radius: 20px;">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-4 text-muted small uppercase">Centro de Operaciones</h5>
+            
+            <div class="row g-4">
+                
+                <div class="col-md-4">
+                    <div class="card h-100 border bg-light bg-opacity-10" style="border-radius: 15px;">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold"><i class="bi bi-bank me-2 text-success"></i>Red Educativa</h5>
+                            <p class="card-text text-muted small">Tienes convenio con <strong>{{ colegios.count }}</strong> instituciones.</p>
+                            
+                            <div class="d-grid gap-2 mt-4">
+                                <a href="#" class="btn btn-secondary btn-sm">Mis colegios vinculados</a>
+                                <a href="#" class="btn btn-secondary btn-sm">Explorar instituciones</a>
+                                
+                                <div class="dropdown d-grid">
+                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Ver Más
+                                    </button>
+                                    <ul class="dropdown-menu w-100 shadow-sm border-0">
+                                        <li><a class="dropdown-item small text-muted" href="#"><i class="bi bi-file-earmark-bar-graph me-2"></i>Reporte de impacto</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card h-100 border bg-light bg-opacity-10" style="border-radius: 15px;">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold"><i class="bi bi-briefcase me-2 text-info"></i>Prácticas Profesionales</h5>
+                            <p class="card-text text-muted small">Publica vacantes para que los colegios las aprueben.</p>
+                            
+                            <div class="d-grid gap-2 mt-4">
+                                <a href="#" class="btn btn-primary btn-sm">Publicar nueva oferta</a>
+                                <a href="#" class="btn btn-secondary btn-sm">Historial de ofertas</a>
+                                
+                                <div class="dropdown d-grid">
+                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Ver Más
+                                    </button>
+                                    <ul class="dropdown-menu w-100 shadow-sm border-0">
+                                        <li><a class="dropdown-item small text-muted" href="#"><i class="bi bi-archive me-2"></i>Ofertas cerradas</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card h-100 border bg-light bg-opacity-10" style="border-radius: 15px;">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold"><i class="bi bi-people me-2 text-warning"></i>Reclutamiento</h5>
+                            <p class="card-text text-muted small">Revisa los perfiles de los estudiantes que han postulado.</p>
+                            
+                            <div class="d-grid gap-2 mt-4">
+                                <a href="#" class="btn btn-secondary btn-sm">Revisar postulantes</a>
+                                <a href="#" class="btn btn-secondary btn-sm">Entrevistas agendadas</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div> </div> </div> </div>
 {% endblock %}
