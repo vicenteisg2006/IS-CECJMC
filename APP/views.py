@@ -569,7 +569,7 @@ def aprobarPracticas(request):
     mi_colegio = request.user.centro_educacional
     
     # Traemos las ofertas enviadas a este colegio, ordenando las pendientes primero
-    ofertas = models.OfertaPractica.objects.filter(colegio=mi_colegio).order_by(
+    ofertas = models.OfertaLaboral.objects.filter(colegio=mi_colegio, es_practica=True).order_by(
         models.Case(
             models.When(estado='Pendiente', then=0),
             models.When(estado='Aprobada', then=1),
