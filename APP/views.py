@@ -5,7 +5,7 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
 from django.db.models import Q
 from functools import wraps
-from urllib import request
+# from urllib import request
 import pandas as pd
 from . import models
 import openpyxl
@@ -267,11 +267,59 @@ def publicar_practica(request):
             
     return redirect('dashboard_empresa')
 
+@login_required
+@perfil_requerido('empresa')
+def historial_ofertas(request):
+    empresa_actual = request.user
+    
+    ofertas = models.OfertaLaboral.objects.filter(
+        empresa=empresa_actual
+    ).order_by('-fecha_publicacion')
+    
+    return render(request, '3_Empresa/historialOfertas.html', {'ofertas': ofertas})
 
+@login_required
+@perfil_requerido('empresa')
+def revisar_postulantes(request):
+    empresa_actual = request.user
+    postulaciones = models.Postulacion.objects.filter(
+        oferta_laboral__empresa=empresa_actual
+    ).select_related('usuario', 'oferta_laboral', 'usuario__centro_educacional').order_by('-fecha_postulacion')
+    
+    return render(request, '3_Empresa/revisarPostulantes.html', {'postulaciones': postulaciones})
 
+@login_required
+@perfil_requerido('empresa')
+def mis_colegios(request):
+    colegios = request.user.colegios_vinculados.all()
+    return render(request, '3_Empresa/misColegios.html', {'colegios': colegios})
 
+@login_required
+@perfil_requerido('empresa')
+def explorar_instituciones(request):
+    mis_vinculos = request.user.colegios_vinculados.all()
+    colegios_disponibles = models.CentroEducacional.objects.exclude(id__in=mis_vinculos)
+    
+    query = request.GET.get('q', '')
+    if query:
+        colegios_disponibles = colegios_disponibles.filter(
+            Q(nombre__icontains=query) | Q(direccion__icontains=query)
+        )
+        
+    return render(request, '3_Empresa/explorarColegios.html', {
+        'colegios': colegios_disponibles,
+        'query': query
+    })
 
-
+@login_required
+@perfil_requerido('empresa')
+def entrevistas_agendadas(request):
+    entrevistas = models.Postulacion.objects.filter(
+        oferta_laboral__empresa=request.user,
+        estado_solicitud='aceptada'
+    ).select_related('usuario', 'oferta_laboral')
+    
+    return render(request, '3_Empresa/entrevistas.html', {'entrevistas': entrevistas})
 
 
 
@@ -326,13 +374,6 @@ def administracion(request):
 @login_required
 @perfil_requerido('colegio')
 def moderacionPerfil(request):
-    # 1. Filtro de Seguridad: Verificamos que sea una cuenta de colegio
-    tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
-    if tipo_usuario != 'colegio':
-        messages.error(request, 'Acceso denegado. Solo administradores de colegios pueden ver esto.')
-        return redirect('ver_perfil')
-
-    # 2. Obtener el colegio del usuario actual
     mi_colegio = request.user.centro_educacional
     
     # 3. Base de la búsqueda: Todos los usuarios de ESTE colegio, excepto a sí mismo
@@ -363,8 +404,6 @@ def cargar_estudiantes_excel(request):
         archivo = request.FILES["archivo_excel"]
         try:
             df = pd.read_excel(archivo)
-
-            perfil_estudiante = models.TipoPerfil.objects.get(tipo_perfil__iexact='ESTUDIANTE')
             
             for _, row in df.iterrows():
 
@@ -376,7 +415,7 @@ def cargar_estudiantes_excel(request):
                     last_name=row['APELLIDO']
                 )
 
-                user.tipo_perfil = perfil_estudiante
+                user.tipo_perfil = models.TipoPerfil.ESTUDIANTE
                 user.curso = row['CURSO']
                 user.fecha_nacimiento = row['FECHA_NACIMIENTO']
                 
@@ -399,7 +438,6 @@ def cargar_empresas_excel(request):
         archivo = request.FILES["archivo_excel"]
         try:
             df = pd.read_excel(archivo)
-            perfil_empresa = models.TipoPerfil.objects.get(tipo_perfil__iexact='EMPRESA')
             
             for _, row in df.iterrows():
                 user = models.Usuario.objects.create_user(
@@ -408,7 +446,7 @@ def cargar_empresas_excel(request):
                     password=str(row['CONTRASEÑA']),
                     first_name=row['NOMBRE'] # Para empresas solo usamos el primer nombre
                 )
-                user.tipo_perfil = perfil_empresa
+                user.tipo_perfil = models.TipoPerfil.EMPRESA
                 # Aquí no asignamos curso ni colegio según tu lógica de empresas
                 user.save()
                 
@@ -481,7 +519,7 @@ def gestionarAlumnos(request):
     
     alumnos = models.Usuario.objects.filter(
         centro_educacional=mi_colegio,
-        tipo_perfil__tipo_perfil__iexact='estudiante'
+        tipo_perfil__iexact='estudiante'
     ).order_by('last_name')
 
     query = request.GET.get('q', '') # Capturamos lo que el usuario escribió
@@ -524,11 +562,6 @@ def actualizar_curso_alumno(request, user_id):
 @perfil_requerido('colegio')
 def crear_curso(request):
     if request.method == 'POST':
-        tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
-        if tipo_usuario != 'colegio':
-            messages.error(request, 'Acceso denegado.')
-            return redirect('ver_perfil')
-
         nombre_curso = request.POST.get('nombre_curso')
         mi_colegio = request.user.centro_educacional
 
@@ -557,7 +590,7 @@ def restablecerClaves(request):
     mi_colegio = request.user.centro_educacional
     alumnos = models.Usuario.objects.filter(
         centro_educacional=mi_colegio,
-        tipo_perfil__tipo_perfil__iexact='estudiante'
+        tipo_perfil__iexact='estudiante'
     ).order_by('last_name')
 
     query = request.GET.get('q', '')
@@ -598,7 +631,7 @@ def gestionarEmpresas(request):
     
     empresas = models.Usuario.objects.filter(
         colegios_vinculados=mi_colegio,
-        tipo_perfil__tipo_perfil__iexact='empresa'
+        tipo_perfil__iexact='empresa'
     ).order_by('first_name')
 
     query = request.GET.get('q', '')
@@ -610,7 +643,7 @@ def gestionarEmpresas(request):
         )
 
     empresas_disponibles = models.Usuario.objects.filter(
-        tipo_perfil__tipo_perfil__iexact='empresa'
+        tipo_perfil__iexact='empresa'
     ).exclude(colegios_vinculados=mi_colegio).order_by('first_name')
 
     context = {
@@ -624,16 +657,13 @@ def gestionarEmpresas(request):
 @perfil_requerido('colegio')
 def vincular_empresa(request):
     if request.method == 'POST':
-        tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
-        if tipo_usuario != 'colegio':
-            return redirect('ver_perfil')
 
         mi_colegio = request.user.centro_educacional
         empresa_id = request.POST.get('empresa_id') 
 
         if empresa_id:
             # Buscamos la empresa exacta por su ID
-            empresa_seleccionada = get_object_or_404(models.Usuario, id=empresa_id, tipo_perfil__tipo_perfil__iexact='empresa')
+            empresa_seleccionada = get_object_or_404(models.Usuario, id=empresa_id, tipo_perfil__iexact='empresa')
             
             # La vinculamos
             empresa_seleccionada.colegios_vinculados.add(mi_colegio)
@@ -677,17 +707,14 @@ def cambiar_estado_oferta(request, oferta_id, nuevo_estado):
 def metricasEmpresas(request):
     mi_colegio = request.user.centro_educacional
     
-    # Cálculos para el Dashboard
-    total_empresas = models.Usuario.objects.filter(colegios_vinculados=mi_colegio, tipo_perfil__tipo_perfil__iexact='empresa').count()
-    total_ofertas = models.OfertaPractica.objects.filter(colegio=mi_colegio).count()
-    ofertas_aprobadas = models.OfertaPractica.objects.filter(colegio=mi_colegio, estado='Aprobada').count()
-    cupos_totales = sum(oferta.cupos for oferta in models.OfertaPractica.objects.filter(colegio=mi_colegio, estado='Aprobada'))
+    total_empresas = models.Usuario.objects.filter(colegios_vinculados=mi_colegio, tipo_perfil__iexact='empresa').count()
+    total_ofertas = models.OfertaLaboral.objects.filter(colegio=mi_colegio).count()
+    ofertas_aprobadas = models.OfertaLaboral.objects.filter(colegio=mi_colegio, estado_verificacion=models.EstadoVerificacion.APROBADO).count()
 
     context = {
         'total_empresas': total_empresas,
         'total_ofertas': total_ofertas,
         'ofertas_aprobadas': ofertas_aprobadas,
-        'cupos_totales': cupos_totales,
     }
     return render(request, '4_Colegio/metricasEmpresas.html', context)
 
@@ -707,7 +734,7 @@ def redEgresados(request):
     mi_colegio = request.user.centro_educacional
     egresados = models.Usuario.objects.filter(
         centro_educacional=mi_colegio,
-        tipo_perfil__tipo_perfil__iexact='estudiante',
+        tipo_perfil__iexact='estudiante',
         curso__isnull=True
     ).order_by('last_name')
     
@@ -772,7 +799,7 @@ def reporteEmpleabilidad(request):
     
     egresados = models.Usuario.objects.filter(
         centro_educacional=mi_colegio,
-        tipo_perfil__tipo_perfil__iexact='estudiante',
+        tipo_perfil__iexact='estudiante',
         curso__isnull=True
     )
     total_egresados = egresados.count()
@@ -977,7 +1004,7 @@ def descargar_datos_json(request):
         "email": user.email,
         "telefono": user.telefono,
         "direccion": user.direccion,
-        "tipo_perfil": user.tipo_perfil.tipo_perfil if user.tipo_perfil else "No especificado",
+        "tipo_perfil": user.get_tipo_perfil_display() if user.tipo_perfil else "No especificado",
         "centro_educacional": user.centro_educacional.nombre if user.centro_educacional else "No especificado",
         "fecha_registro": user.date_joined.strftime("%Y-%m-%d %H:%M:%S")
     }
@@ -988,4 +1015,3 @@ def descargar_datos_json(request):
     
     return response
 
-#

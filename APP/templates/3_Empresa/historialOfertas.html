@@ -1,0 +1,69 @@
+{% extends "0_Bases/3base.html" %}
+{% block title %}Historial de Ofertas{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2 class="fw-bold"><i class="bi bi-archive me-2 text-secondary"></i>Historial de Publicaciones</h2>
+            <p class="text-muted">Revisa el estado de las prácticas y trabajos que has enviado a los colegios.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Volver al Panel
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0" style="border-radius: 15px;">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Puesto / Cargo</th>
+                            <th>Tipo</th>
+                            <th>Colegio Destino</th>
+                            <th>Fecha de Envío</th>
+                            <th>Estado Verificación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for oferta in ofertas %}
+                        <tr>
+                            <td class="ps-4 fw-bold text-primary">{{ oferta.puesto_trabajo }}</td>
+                            <td>
+                                {% if oferta.es_practica %}
+                                    <span class="badge bg-info text-dark border border-info">Práctica</span>
+                                {% else %}
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary">Trabajo Regular</span>
+                                {% endif %}
+                            </td>
+                            <td><i class="bi bi-bank me-2 text-muted"></i>{{ oferta.colegio.nombre }}</td>
+                            <td>{{ oferta.fecha_publicacion|date:"d M Y" }}</td>
+                            <td>
+                                {% if oferta.estado_verificacion == 'aprobado' %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success"><i class="bi bi-check-circle me-1"></i> Aprobada</span>
+                                {% elif oferta.estado_verificacion == 'rechazado' %}
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger"><i class="bi bi-x-circle me-1"></i> Rechazada</span>
+                                {% else %}
+                                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning"><i class="bi bi-clock me-1"></i> Pendiente</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1"></i>
+                                <p class="mt-2">Aún no has publicado ninguna oferta.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

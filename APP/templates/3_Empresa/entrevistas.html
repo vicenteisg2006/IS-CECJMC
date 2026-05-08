@@ -1,0 +1,34 @@
+{% extends "0_Bases/3base.html" %}
+{% block content %}
+<div class="container-fluid py-4">
+    <h2 class="fw-bold mb-4"><i class="bi bi-calendar-check me-2 text-warning"></i>Candidatos Seleccionados</h2>
+    <div class="card shadow-sm border-0" style="border-radius: 15px;">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Estudiante</th>
+                        <th>Oferta</th>
+                        <th>Institución</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in entrevistas %}
+                    <tr>
+                        <td class="ps-4"><strong>{{ e.usuario.first_name }} {{ e.usuario.last_name }}</strong></td>
+                        <td>{{ e.oferta_laboral.puesto_trabajo }}</td>
+                        <td>{{ e.usuario.centro_educacional.nombre }}</td>
+                        <td>
+                            <a href="mailto:{{ e.usuario.email }}" class="btn btn-primary btn-sm">Contactar Estudiante</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="text-center py-5 text-muted">No tienes entrevistas agendadas o candidatos aceptados aún.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

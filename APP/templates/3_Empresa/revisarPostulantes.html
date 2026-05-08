@@ -1,0 +1,68 @@
+{% extends "0_Bases/3base.html" %}
+{% block title %}Revisar Postulantes{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2 class="fw-bold"><i class="bi bi-people me-2 text-warning"></i>Revisar Postulantes</h2>
+            <p class="text-muted">Gestiona las solicitudes de los estudiantes a tus ofertas de práctica o trabajo.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{% url 'business' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Volver al Panel
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for postulacion in postulaciones %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0" style="border-radius: 15px;">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="{{ postulacion.usuario.get_avatar }}" class="rounded-circle me-3 border" width="60" height="60" style="object-fit: cover;">
+                        <div>
+                            <h6 class="fw-bold mb-0">{{ postulacion.usuario.first_name }} {{ postulacion.usuario.last_name }}</h6>
+                            <small class="text-muted"><i class="bi bi-bank me-1"></i>{{ postulacion.usuario.centro_educacional.nombre }}</small>
+                        </div>
+                    </div>
+                    
+                    <hr class="text-muted opacity-25">
+                    
+                    <p class="small mb-1 text-muted">Postula a:</p>
+                    <p class="fw-bold text-primary mb-3">{{ postulacion.oferta_laboral.puesto_trabajo }}</p>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted"><i class="bi bi-calendar-event me-1"></i>{{ postulacion.fecha_postulacion|date:"d M Y" }}</small>
+                        
+                        {% if postulacion.estado_solicitud == 'aceptada' %}
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success">Aceptado</span>
+                        {% elif postulacion.estado_solicitud == 'rechazada' %}
+                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger">Rechazado</span>
+                        {% else %}
+                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning">Pendiente</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if postulacion.estado_solicitud != 'aceptada' and postulacion.estado_solicitud != 'rechazada' %}
+                <div class="card-footer bg-transparent border-0 pt-0 pb-3">
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a href="#" class="btn btn-outline-danger btn-sm w-100"><i class="bi bi-x-lg me-1"></i>Rechazar</a>
+                        <a href="#" class="btn btn-success btn-sm w-100"><i class="bi bi-check-lg me-1"></i>Aceptar</a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-person-x text-muted fs-1"></i>
+            <p class="text-muted mt-3">Aún no hay postulantes para tus ofertas. ¡Ten paciencia!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

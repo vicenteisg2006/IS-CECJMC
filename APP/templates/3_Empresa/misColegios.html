@@ -1,0 +1,27 @@
+{% extends "0_Bases/3base.html" %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="bi bi-bank me-2 text-success"></i>Mis Convenios Activos</h2>
+        <a href="{% url 'business' %}" class="btn btn-outline-secondary btn-sm">Volver</a>
+    </div>
+    <div class="row g-4">
+        {% for c in colegios %}
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100" style="border-radius: 15px;">
+                <div class="card-body">
+                    <h5 class="fw-bold text-primary">{{ c.nombre }}</h5>
+                    <p class="small text-muted"><i class="bi bi-geo-alt me-1"></i>{{ c.direccion }}</p>
+                    <hr>
+                    <div class="d-grid">
+                        <a href="mailto:{{ c.email }}" class="btn btn-light btn-sm text-primary">Contactar Institución</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-muted">No tienes convenios activos actualmente.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

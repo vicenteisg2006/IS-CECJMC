@@ -54,6 +54,11 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'), #dashboard
 
     path('empresa/publicar-practica/', views.publicar_practica, name='publicar_practica'),
+    path('empresa/historial-ofertas/', views.historial_ofertas, name='historial_ofertas'),
+    path('empresa/revisar-postulantes/', views.revisar_postulantes, name='revisar_postulantes'),
+    path('empresa/mis-colegios/', views.mis_colegios, name='mis_colegios'),
+    path('empresa/explorar-instituciones/', views.explorar_instituciones, name='explorar_instituciones'),
+    path('empresa/entrevistas-agendadas/', views.entrevistas_agendadas, name='entrevistas_agendadas'),
 
     #Funciones generales
     path('post/', views.crear_post, name='crear_post'),

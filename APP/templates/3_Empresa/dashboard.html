@@ -1,4 +1,4 @@
-{% extends "0_Bases/3base.html" %}
+{% extends "0_Bases/2base.html" %}
 {% block title %}Dashboard Empresa - {{ request.user.first_name }}{% endblock %}
 
 {% block content %}
@@ -24,8 +24,8 @@
                             <p class="card-text text-muted small">Tienes convenio con <strong>{{ colegios.count }}</strong> instituciones.</p>
                             
                             <div class="d-grid gap-2 mt-4">
-                                <a href="#" class="btn btn-secondary btn-sm">Mis colegios vinculados</a>
-                                <a href="#" class="btn btn-secondary btn-sm">Explorar instituciones</a>
+                                <a href="{% url 'mis_colegios' %}" class="btn btn-secondary btn-sm">Mis colegios vinculados</a>
+                                <a href="{% url 'explorar_instituciones' %}" class="btn btn-secondary btn-sm">Explorar instituciones</a>
                                 
                                 <div class="dropdown d-grid">
                                     <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -50,7 +50,7 @@
                                 <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalPublicarPractica">
                                     Publicar nueva oferta
                                 </button>
-                                <a href="#" class="btn btn-secondary btn-sm">Historial de ofertas</a>
+                                <a href="{% url 'historial_ofertas' %}" class="btn btn-secondary btn-sm">Historial de ofertas</a>
                                 
                                 <div class="dropdown d-grid">
                                     <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -72,8 +72,8 @@
                             <p class="card-text text-muted small">Revisa los perfiles de los estudiantes que han postulado.</p>
                             
                             <div class="d-grid gap-2 mt-4">
-                                <a href="#" class="btn btn-secondary btn-sm">Revisar postulantes</a>
-                                <a href="#" class="btn btn-secondary btn-sm">Entrevistas agendadas</a>
+                                <a href="{% url 'revisar_postulantes' %}" class="btn btn-secondary btn-sm">Revisar postulantes</a>
+                                <a href="{% url 'entrevistas_agendadas' %}" class="btn btn-secondary btn-sm">Entrevistas agendadas</a>
                             </div>
                         </div>
                     </div>
