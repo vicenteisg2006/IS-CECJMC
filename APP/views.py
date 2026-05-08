@@ -34,35 +34,6 @@ def perfil_requerido(perfil_permitido):
     return decorator
 
 
-@login_required(login_url='/') 
-@perfil_requerido('estudiante')
-def student(request):
-    post = models.Post.objects.all().order_by('-fecha_publicacion').select_related('usuario')
-    return render(request, "2_Estudiante/student.html", 
-                  {
-                    "posts": post
-                  })
-
-@login_required(login_url='/')
-@perfil_requerido('colegio')
-def school(request):
-    post = models.Post.objects.all().order_by('-fecha_publicacion').select_related('usuario')
-    return render(request, "4_Colegio/school.html", 
-                  {
-                    "posts": post
-                  })
-
-@login_required(login_url='/')
-@perfil_requerido('empresa')
-def business(request):
-    post = models.Post.objects.all().order_by('-fecha_publicacion').select_related('usuario')
-    return render(request, "3_Empresa/business.html", 
-                  {
-                    "posts": post
-                  })
-
-
-
 
 # ===========================================================
 #                                 LOGIN Y LOGOUT
@@ -102,12 +73,11 @@ def login(request):
         
     return render(request, "1_Login/login.html")
 
-
 def logout_function(request):
     logout(request)
     return redirect('login')
 
-#
+
 
 
 
@@ -142,20 +112,39 @@ def logout_function(request):
 #                              VISTAS ESTUDIANTES
 # ===========================================================
 
+@login_required 
+@perfil_requerido('estudiante')
+def student(request):
+    post = models.Post.objects.all().order_by('-fecha_publicacion').select_related('usuario')
+    return render(request, "2_Estudiante/student.html", 
+                  {
+                    "posts": post
+                  })
+
+@login_required
+@perfil_requerido('estudiante')
 def notificaciones_e(request):
     return render(request, "2_Estudiante/notificaciones.html")
 
+@login_required
+@perfil_requerido('estudiante')
 def practicas_e(request):
     practicas = models.OfertaLaboral.objects.all()
     context = {'tatata':practicas}
     return render(request, "2_Estudiante/practicas.html", context)
 
+@login_required
+@perfil_requerido('estudiante')
 def empresas_e(request):
     return render(request, "2_Estudiante/empresas.html")
 
+@login_required
+@perfil_requerido('estudiante')
 def tareas_e(request):
     return render(request, "2_Estudiante/tareas.html")
 
+@login_required
+@perfil_requerido('estudiante')
 def conexiones_e(request):
     return render(request, "2_Estudiante/conexiones.html")
 
@@ -207,6 +196,17 @@ def conexiones_e(request):
 #                                VISTAS EMPRESAS
 # ===========================================================
 
+@login_required
+@perfil_requerido('empresa')
+def business(request):
+    post = models.Post.objects.all().order_by('-fecha_publicacion').select_related('usuario')
+    return render(request, "3_Empresa/business.html", 
+                  {
+                    "posts": post
+                  })
+
+@login_required
+@perfil_requerido('empresa')
 def dashboard(request):
     return render(request, "3_Empresa/dashboard.html")
 
@@ -255,10 +255,22 @@ def dashboard(request):
 #                                VISTAS COLEGIOS
 # ===========================================================
 
+@login_required
+@perfil_requerido('colegio')
+def school(request):
+    post = models.Post.objects.all().order_by('-fecha_publicacion').select_related('usuario')
+    return render(request, "4_Colegio/school.html", 
+                  {
+                    "posts": post
+                  })
+
+@login_required
+@perfil_requerido('colegio')
 def administracion(request):
     return render(request, "4_Colegio/administracion.html")
 
 @login_required
+@perfil_requerido('colegio')
 def moderacionPerfil(request):
     # 1. Filtro de Seguridad: Verificamos que sea una cuenta de colegio
     tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
@@ -290,6 +302,8 @@ def moderacionPerfil(request):
     # Renderizamos apuntando a la carpeta 4_Colegio
     return render(request, '4_Colegio/moderacionPerfil.html', context)
 
+@login_required
+@perfil_requerido('colegio')
 def cargar_estudiantes_excel(request):
     if request.method == "POST" and request.FILES.get("archivo_excel"):
         archivo = request.FILES["archivo_excel"]
@@ -324,6 +338,8 @@ def cargar_estudiantes_excel(request):
             
     return redirect('moderacionPerfil')
 
+@login_required
+@perfil_requerido('colegio')
 def cargar_empresas_excel(request):
     if request.method == "POST" and request.FILES.get("archivo_excel"):
         archivo = request.FILES["archivo_excel"]
@@ -349,6 +365,7 @@ def cargar_empresas_excel(request):
     return redirect('moderacionPerfil')
 
 @login_required
+@perfil_requerido('colegio')
 def suspender_usuario(request, user_id):
     if request.method == 'POST':
         # Buscamos al usuario que intentan suspender
@@ -373,6 +390,7 @@ def suspender_usuario(request, user_id):
     return redirect('moderacionPerfil')
 
 @login_required
+@perfil_requerido('colegio')
 def moderacionContenido(request):
     tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
     if tipo_usuario != 'colegio':
@@ -392,6 +410,7 @@ def moderacionContenido(request):
     return render(request, '4_Colegio/moderacionContenido.html', context)
 
 @login_required
+@perfil_requerido('colegio')
 def eliminar_post_colegio(request, post_id):
     if request.method == 'POST':
         post = get_object_or_404(models.Post, id=post_id)
@@ -405,6 +424,7 @@ def eliminar_post_colegio(request, post_id):
     return redirect('moderacionContenido')
 
 @login_required
+@perfil_requerido('colegio')
 def gestionarAlumnos(request):
     tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
     if tipo_usuario != 'colegio':
@@ -436,6 +456,7 @@ def gestionarAlumnos(request):
     return render(request, '4_Colegio/gestionarAlumnos.html', context)
 
 @login_required
+@perfil_requerido('colegio')
 def actualizar_curso_alumno(request, user_id):
     if request.method == 'POST':
         alumno = get_object_or_404(models.Usuario, id=user_id)
@@ -454,6 +475,7 @@ def actualizar_curso_alumno(request, user_id):
     return redirect('gestionarAlumnos')
 
 @login_required
+@perfil_requerido('colegio')
 def crear_curso(request):
     if request.method == 'POST':
         tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
@@ -484,6 +506,7 @@ def crear_curso(request):
     return redirect('gestionarAlumnos')
 
 @login_required
+@perfil_requerido('colegio')
 def restablecerClaves(request):
     tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
     if tipo_usuario != 'colegio':
@@ -509,6 +532,7 @@ def restablecerClaves(request):
     return render(request, '4_Colegio/restablecerClaves.html', context)
 
 @login_required
+@perfil_requerido('colegio')
 def generar_clave_temporal(request, user_id):
     if request.method == 'POST':
         alumno = get_object_or_404(models.Usuario, id=user_id)
@@ -527,6 +551,7 @@ def generar_clave_temporal(request, user_id):
     return redirect('restablecerClaves')
 
 @login_required
+@perfil_requerido('colegio')
 def gestionarEmpresas(request):
     tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
     if tipo_usuario != 'colegio':
@@ -560,6 +585,7 @@ def gestionarEmpresas(request):
     return render(request, '4_Colegio/gestionarEmpresas.html', context)
 
 @login_required
+@perfil_requerido('colegio')
 def vincular_empresa(request):
     if request.method == 'POST':
         tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
@@ -582,6 +608,7 @@ def vincular_empresa(request):
     return redirect('gestionarEmpresas')
 
 @login_required
+@perfil_requerido('colegio')
 def aprobarPracticas(request):
     tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
     if tipo_usuario != 'colegio':
@@ -602,6 +629,7 @@ def aprobarPracticas(request):
     return render(request, '4_Colegio/aprobarPracticas.html', {'ofertas': ofertas})
 
 @login_required
+@perfil_requerido('colegio')
 def cambiar_estado_oferta(request, oferta_id, nuevo_estado):
     if request.method == 'POST':
         oferta = get_object_or_404(models.OfertaLaboral, id=oferta_id, colegio=request.user.centro_educacional)
@@ -612,6 +640,7 @@ def cambiar_estado_oferta(request, oferta_id, nuevo_estado):
     return redirect('aprobarPracticas')
 
 @login_required
+@perfil_requerido('colegio')
 def metricasEmpresas(request):
     tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
     if tipo_usuario != 'colegio':
@@ -633,8 +662,8 @@ def metricasEmpresas(request):
     }
     return render(request, '4_Colegio/metricasEmpresas.html', context)
 
-
 @login_required
+@perfil_requerido('colegio')
 def seguimientoPracticas(request):
     mi_colegio = request.user.centro_educacional
     practicas = models.ExperienciaLaboral.objects.filter(
@@ -644,6 +673,7 @@ def seguimientoPracticas(request):
     return render(request, '4_Colegio/seguimientoPracticas.html', {'practicas': practicas})
 
 @login_required
+@perfil_requerido('colegio')
 def redEgresados(request):
     mi_colegio = request.user.centro_educacional
     egresados = models.Usuario.objects.filter(
@@ -655,6 +685,7 @@ def redEgresados(request):
     return render(request, '4_Colegio/redEgresados.html', {'egresados': egresados})
 
 @login_required
+@perfil_requerido('colegio')
 def gestionarEspecialidades(request):
     mi_colegio = request.user.centro_educacional
     if request.method == 'POST':
@@ -672,6 +703,7 @@ def gestionarEspecialidades(request):
     })
 
 @login_required
+@perfil_requerido('colegio')
 def gestionarContenidoEducativo(request):
     mi_colegio = request.user.centro_educacional
     if request.method == 'POST':
@@ -689,6 +721,8 @@ def gestionarContenidoEducativo(request):
     contenidos = models.ContenidoEducativo.objects.filter(colegio=mi_colegio).order_by('-fecha_subida')
     return render(request, '4_Colegio/gestionarContenido.html', {'contenidos': contenidos})
 
+@login_required
+@perfil_requerido('colegio')
 def exportarDatosExcel(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="alumnos_rel_plus.csv"'
@@ -703,6 +737,7 @@ def exportarDatosExcel(request):
     return response
 
 @login_required
+@perfil_requerido('colegio')
 def reporteEmpleabilidad(request):
     tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
     if tipo_usuario != 'colegio':
