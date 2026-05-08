@@ -392,10 +392,6 @@ def suspender_usuario(request, user_id):
 @login_required
 @perfil_requerido('colegio')
 def moderacionContenido(request):
-    tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
-    if tipo_usuario != 'colegio':
-        messages.error(request, 'Acceso denegado. Solo colegios pueden moderar contenido.')
-        return redirect('ver_perfil')
 
     mi_colegio = request.user.centro_educacional
     
@@ -426,10 +422,6 @@ def eliminar_post_colegio(request, post_id):
 @login_required
 @perfil_requerido('colegio')
 def gestionarAlumnos(request):
-    tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
-    if tipo_usuario != 'colegio':
-        messages.error(request, 'Acceso denegado.')
-        return redirect('ver_perfil')
 
     mi_colegio = request.user.centro_educacional
     
@@ -508,11 +500,6 @@ def crear_curso(request):
 @login_required
 @perfil_requerido('colegio')
 def restablecerClaves(request):
-    tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
-    if tipo_usuario != 'colegio':
-        messages.error(request, 'Acceso denegado.')
-        return redirect('ver_perfil')
-
     mi_colegio = request.user.centro_educacional
     alumnos = models.Usuario.objects.filter(
         centro_educacional=mi_colegio,
@@ -553,11 +540,6 @@ def generar_clave_temporal(request, user_id):
 @login_required
 @perfil_requerido('colegio')
 def gestionarEmpresas(request):
-    tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
-    if tipo_usuario != 'colegio':
-        messages.error(request, 'Acceso denegado.')
-        return redirect('ver_perfil')
-
     mi_colegio = request.user.centro_educacional
     
     empresas = models.Usuario.objects.filter(
@@ -610,9 +592,6 @@ def vincular_empresa(request):
 @login_required
 @perfil_requerido('colegio')
 def aprobarPracticas(request):
-    tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
-    if tipo_usuario != 'colegio':
-        return redirect('ver_perfil')
 
     mi_colegio = request.user.centro_educacional
     
@@ -642,10 +621,6 @@ def cambiar_estado_oferta(request, oferta_id, nuevo_estado):
 @login_required
 @perfil_requerido('colegio')
 def metricasEmpresas(request):
-    tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
-    if tipo_usuario != 'colegio':
-        return redirect('ver_perfil')
-
     mi_colegio = request.user.centro_educacional
     
     # Cálculos para el Dashboard
@@ -739,10 +714,6 @@ def exportarDatosExcel(request):
 @login_required
 @perfil_requerido('colegio')
 def reporteEmpleabilidad(request):
-    tipo_usuario = request.user.tipo_perfil.tipo_perfil.lower() if request.user.tipo_perfil else ''
-    if tipo_usuario != 'colegio':
-        return redirect('ver_perfil')
-
     mi_colegio = request.user.centro_educacional
     
     egresados = models.Usuario.objects.filter(
@@ -834,7 +805,7 @@ def testalert(request):
 # ===========================================================
 
 
-@login_required(login_url='/')
+@login_required
 def crear_post(request):
     if request.method == "POST":
         texto = request.POST.get("contenido_post", "").strip()
