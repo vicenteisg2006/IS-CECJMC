@@ -47,7 +47,9 @@
                             <p class="card-text text-muted small">Publica vacantes para que los colegios las aprueben.</p>
                             
                             <div class="d-grid gap-2 mt-4">
-                                <a href="#" class="btn btn-primary btn-sm">Publicar nueva oferta</a>
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalPublicarPractica">
+                                    Publicar nueva oferta
+                                </button>
                                 <a href="#" class="btn btn-secondary btn-sm">Historial de ofertas</a>
                                 
                                 <div class="dropdown d-grid">
@@ -77,5 +79,85 @@
                     </div>
                 </div>
 
-            </div> </div> </div> </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalPublicarPractica" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius: 15px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold"><i class="bi bi-briefcase me-2 text-primary"></i>Publicar Nueva Oferta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <form action="{% url 'publicar_practica' %}" method="POST">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p class="text-muted small mb-4">Esta publicación será enviada al director del establecimiento para su verificación antes de ser visible para alumnos o egresados.</p>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold text-muted small">Colegio Destino</label>
+                            <select name="colegio_destino" class="form-select" required>
+                                <option value="" disabled selected>Selecciona el colegio con el que tienes convenio...</option>
+                                {% for colegio in colegios %}
+                                    <option value="{{ colegio.id }}">{{ colegio.nombre }}</option>
+                                {% empty %}
+                                    <option value="" disabled>No tienes colegios vinculados actualmente.</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small">Tipo de Publicación</label>
+                            <select name="tipo_oferta" class="form-select border-primary" required>
+                                <option value="practica">Práctica Profesional (Para Estudiantes)</option>
+                                <option value="trabajo">Trabajo Regular (Para Egresados)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small">Sueldo Ofrecido (Opcional)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" name="sueldo" class="form-control" placeholder="Ej: 500000">
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold text-muted small">Puesto o Cargo</label>
+                            <input type="text" name="puesto_trabajo" class="form-control" placeholder="Ej: Técnico en Conectividad y Redes / Soporte IT" required>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small">Modalidad</label>
+                            <select name="modalidad" class="form-select" required>
+                                <option value="Presencial">Presencial</option>
+                                <option value="Híbrido">Híbrido</option>
+                                <option value="Remoto">Remoto</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small">Ubicación (Dirección o Comuna)</label>
+                            <input type="text" name="ubicacion" class="form-control" placeholder="Ej: Providencia, Santiago" required>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold text-muted small">Detalle y Requisitos</label>
+                            <textarea name="detalle" class="form-control" rows="4" placeholder="Describe las funciones, horarios, y qué esperas del candidato..." required></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer border-0 pt-0 mt-3">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary px-4" {% if not colegios %}disabled{% endif %}>Enviar a Verificación</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

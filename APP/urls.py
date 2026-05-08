@@ -53,6 +53,8 @@ urlpatterns = [
     path('business/', views.business, name='business'), #business
     path('dashboard/', views.dashboard, name='dashboard'), #dashboard
 
+    path('empresa/publicar-practica/', views.publicar_practica, name='publicar_practica'),
+
     #Funciones generales
     path('post/', views.crear_post, name='crear_post'),
     path('like/<int:post_id>/', views.toggle_like, name='toggle_like'),

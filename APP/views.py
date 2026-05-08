@@ -224,7 +224,48 @@ def dashboard(request):
     
     return render(request, "3_Empresa/dashboard.html", context)
 #
-
+@login_required
+@perfil_requerido('empresa')
+def publicar_practica(request):
+    if request.method == 'POST':
+        empresa_actual = request.user
+        
+        puesto = request.POST.get('puesto_trabajo')
+        detalle = request.POST.get('detalle')
+        modalidad = request.POST.get('modalidad')
+        ubicacion = request.POST.get('ubicacion')
+        colegio_id = request.POST.get('colegio_destino')
+        
+        tipo_oferta = request.POST.get('tipo_oferta')
+        es_practica_booleano = True if tipo_oferta == 'practica' else False
+        
+        sueldo_input = request.POST.get('sueldo')
+        sueldo_final = sueldo_input if sueldo_input else None 
+        
+        colegio_destino = get_object_or_404(models.CentroEducacional, id=colegio_id)
+        
+        if colegio_destino in empresa_actual.colegios_vinculados.all():
+            
+            models.OfertaLaboral.objects.create(
+                puesto_trabajo=puesto,
+                empresa=empresa_actual,
+                colegio=colegio_destino,
+                es_practica=es_practica_booleano, 
+                sueldo=sueldo_final,           
+                detalle=detalle,
+                modalidad=modalidad,
+                ubicacion=ubicacion,
+                fecha_expiracion=pd.Timestamp.now() + pd.Timedelta(days=30),
+                estado_oferta=models.EstadoOferta.ACTIVA,
+                estado_verificacion=models.EstadoVerificacion.PENDIENTE 
+            )
+            
+            tipo_texto = "Práctica" if es_practica_booleano else "Oferta Laboral"
+            messages.success(request, f'¡{tipo_texto} enviada a {colegio_destino.nombre} para su verificación!')
+        else:
+            messages.error(request, 'No tienes un convenio activo con este establecimiento.')
+            
+    return redirect('dashboard_empresa')
 
 
 
