@@ -24,6 +24,7 @@ class EstadoVerificacion(models.TextChoices):
     PENDIENTE = 'pendiente','Pendiente'
 
 class TipoPerfil(models.TextChoices):
+    ADMIN = 'admin','Admin'
     ESTUDIANTE = 'estudiante','Estudiante'
     COLEGIO = 'colegio','Colegio'
     EMPRESA = 'empresa','Empresa'
@@ -123,7 +124,7 @@ class Usuario(AbstractUser):
         return '/static/images/profilepic1.jpg'
 
     # Llaves Foráneas (Foreign Keys)
-    tipo_perfil = models.CharField(TipoPerfil, choices=TipoPerfil.choices, max_length=20, default=TipoPerfil.ESTUDIANTE)
+    tipo_perfil = models.CharField(TipoPerfil, choices=TipoPerfil.choices, max_length=20, default=TipoPerfil.ADMIN)
     region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True)
     comuna = models.ForeignKey(Comuna, on_delete=models.SET_NULL, null=True)
     centro_educacional = models.ForeignKey(CentroEducacional, on_delete=models.SET_NULL, null=True)
@@ -132,15 +133,16 @@ class Usuario(AbstractUser):
     curso = models.ForeignKey(Curso, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        tipoo = self.tipo_perfil.tipo_perfil.lower() if self.tipo_perfil else "Desconocido"
+        
+        tipo = self.tipo_perfil
 
-        if tipoo in ["estudiante", "alumno"]:
+        if tipo == TipoPerfil.ESTUDIANTE:
             return f"{self.tipo_perfil} - {self.centro_educacional} - {self.first_name} {self.last_name}"
-        elif tipoo == "colegio":
+        elif tipo == TipoPerfil.COLEGIO:
             return f"{self.tipo_perfil} - {self.centro_educacional}"
-        elif tipoo == "empresa":
+        elif tipo == TipoPerfil.EMPRESA:
             return f"{self.tipo_perfil} - {self.first_name}"
-        else:
+        elif tipo == TipoPerfil.ADMIN:
             return f"Super Admin - {self.username}"
 
 # entidades

@@ -92,7 +92,6 @@ WSGI_APPLICATION = 'PROJECT.wsgi.application'
 # print(ENVIRONMENT == 'production')
 # print(ENVIRONMENT == 'local')
 if ENVIRONMENT == 'local':
-    print('do we get here ?')
     # Local laptops don't use AWS. They use a simple, local SQLite file.
     # This means teammates don't even need to install MySQL on their computers!
     DATABASES = {
