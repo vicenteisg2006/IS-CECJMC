@@ -125,9 +125,9 @@ class Usuario(AbstractUser):
 
     # Llaves Foráneas (Foreign Keys)
     tipo_perfil = models.CharField(TipoPerfil, choices=TipoPerfil.choices, max_length=20, default=TipoPerfil.ADMIN)
-    region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True)
-    comuna = models.ForeignKey(Comuna, on_delete=models.SET_NULL, null=True)
-    centro_educacional = models.ForeignKey(CentroEducacional, on_delete=models.SET_NULL, null=True)
+    region = models.ForeignKey(Region, on_delete=models.SET_NULL, blank=True, null=True)
+    comuna = models.ForeignKey(Comuna, on_delete=models.SET_NULL, blank=True, null=True)
+    centro_educacional = models.ForeignKey(CentroEducacional, on_delete=models.SET_NULL, blank=True, null=True)
     colegios_vinculados = models.ManyToManyField('CentroEducacional', related_name='empresas_asociadas', blank=True)
     competencias = models.ManyToManyField(Competencia, related_name='usuarios_competencia', blank=True, through='CompetenciaEstudiante')
     curso = models.ForeignKey(Curso, on_delete=models.SET_NULL, null=True, blank=True)
