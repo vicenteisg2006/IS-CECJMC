@@ -135,6 +135,10 @@ def notificaciones_e(request):
         receptor=request.user
     ).order_by('-fecha_creacion').select_related('actor')
     
+    notificaciones_no_leidas = notificaciones.filter(leido=False)
+    if notificaciones_no_leidas.exists():
+        notificaciones_no_leidas.update(leido=True)
+    
     return render(request, "2_Estudiante/notificaciones.html", {"notificaciones": notificaciones})
 
 @login_required
@@ -262,6 +266,17 @@ def descargar_cv_e(request):
     
     return response
 
+@login_required
+@perfil_requerido('estudiante')
+def ver_ofertas_empresa(request, empresa_id):
+    empresa = get_object_or_404(models.Usuario, id=empresa_id, tipo_perfil='empresa')
+    
+    ofertas = models.OfertaLaboral.objects.filter(empresa=empresa, estado='activa')
+    
+    return render(request, '2_Estudiante/detalle_empresa.html', {
+        'empresa': empresa,
+        'ofertas': ofertas
+    })
 #
 
 
@@ -453,12 +468,6 @@ def cambiar_estado_postulacion(request, postulacion_id, nuevo_estado):
             else:
                 messages.warning(request, f'Has rechazado la solicitud de {nombre_alumno}.')
                 mensaje_notificacion = "ha declinado tu postulación en esta ocasión."
-            
-            models.Notificacion.objects.create(
-                receptor=postulacion.usuario, 
-                actor=request.user,      
-                tipo_accion=mensaje_notificacion
-            )
             
     return redirect('revisar_postulantes')
 
@@ -1131,7 +1140,7 @@ def actualizar_perfil(request):
             user.last_name = nuevo_apellido
         
         user.bio = request.POST.get('bio')
-        
+
         user.save()
         messages.success(request, "Perfil actualizado.")
     return redirect('ver_perfil')

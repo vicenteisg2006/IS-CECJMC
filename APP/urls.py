@@ -15,6 +15,7 @@ urlpatterns = [
     path('practicas/', views.practicas_e, name='practicas_e'),
     path('empresas/', views.empresas_e, name='empresas_e'),
     path('tareas/', views.tareas_e, name='tareas_e'),
+path('empresa/<int:empresa_id>/ofertas/', views.ver_ofertas_empresa, name='ver_ofertas_empresa'),
     path('conexiones/', views.conexiones_e, name='conexiones_e'),
     path('mis-postulaciones/', views.mis_postulaciones_e, name='mis_postulaciones_e'),
     path('estudiante/descargar-cv/', views.descargar_cv_e, name='descargar_cv_e'),
