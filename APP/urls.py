@@ -16,6 +16,7 @@ urlpatterns = [
     path('empresas/', views.empresas_e, name='empresas_e'),
     path('tareas/', views.tareas_e, name='tareas_e'),
     path('conexiones/', views.conexiones_e, name='conexiones_e'),
+    path('mis-postulaciones/', views.mis_postulaciones_e, name='mis_postulaciones_e'),
 
     #Vistas Colegio
     path('school/', views.school, name='school'), #school
@@ -58,6 +59,7 @@ urlpatterns = [
     path('empresa/mis-colegios/', views.mis_colegios, name='mis_colegios'),
     path('empresa/explorar-instituciones/', views.explorar_instituciones, name='explorar_instituciones'),
     path('empresa/entrevistas-agendadas/', views.entrevistas_agendadas, name='entrevistas_agendadas'),
+    path('empresa/cambiar-estado-postulacion/<int:postulacion_id>/<str:nuevo_estado>/', views.cambiar_estado_postulacion, name='cambiar_estado_postulacion'),
 
     #Funciones generales
     path('post/', views.crear_post, name='crear_post'),
@@ -68,9 +70,6 @@ urlpatterns = [
     path('mi-perfil/configurar-notificaciones/', views.configurar_notificaciones, name='configurar_notificaciones'),
     path('mi-perfil/configurar-privacidad/', views.configurar_privacidad, name='configurar_privacidad'),
     path('mi-perfil/descargar-datos/', views.descargar_datos_json, name='descargar_datos_json'),
-
-
-    path('testalert/', views.testalert, name='testalert'),
 
     # s3 direct and lambda callback
     path('s3direct/', include('s3direct.urls')),

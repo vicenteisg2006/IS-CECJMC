@@ -1,36 +1,74 @@
-<!-- LLamada a Base + Nombre alumno -->
 {% extends "0_Bases/1base.html" %}
-{% load static %}
-{% block title %}{{ request.user.first_name }} {{ request.user.last_name }}{% endblock %}
+{% block title %}Vitrina de Prácticas{% endblock %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-lg-8 col-md-8 mb-4">
-            <h2>Practicas</h2>
-            <p>Aquí puedes ver las prácticas profesionales disponibles. Explora oportunidades que se alineen con tus intereses y habilidades.</p>
+<div class="container-fluid py-4">
+    
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="fw-bold"><i class="bi bi-briefcase me-2 text-primary"></i>Ofertas Disponibles</h2>
+            <p class="text-muted">Explora las prácticas y trabajos validados por tu institución y da el siguiente paso en tu carrera.</p>
         </div>
     </div>
-{% for oferta in tatata %}
-    <div class="card p-3 shadow-sm mb-3" style="border-radius: 15px;">
-        <div class="d-flex align-items-center mb-2">
-            <img src="{% static 'images/profilepic1.jpg' %}" class="rounded-circle me-2" style="width: 35px; height: 35px; object-fit: cover;">
-            <div>
-                <h6 class="mb-0 fw-bold">{{ tatata.empresa }}</h6>
-                <small class="text-muted">{{ oferta }}</small>
+
+    <div class="row g-4">
+        {% for o in ofertas %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow border-0 bg-white 
+                {% if o.es_practica %} border-top border-4 border-info 
+                {% else %} border-top border-4 border-primary {% endif %}" 
+                style="border-radius: 15px; overflow: hidden;">
+                
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        {% if o.es_practica %}
+                            <span class="badge bg-info text-dark border border-info">Práctica Profesional</span>
+                        {% else %}
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary">Trabajo Regular</span>
+                        {% endif %}
+                        <small class="text-muted">{{ o.fecha_publicacion|date:"d M" }}</small>
+                    </div>
+                    
+                    <h5 class="fw-bold mt-3 text-dark">{{ o.puesto_trabajo }}</h5>
+                    <h6 class="text-muted"><i class="bi bi-building me-1"></i>{{ o.empresa.first_name }}</h6>
+                    
+                    <p class="small mt-3 text-secondary" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                        {{ o.detalle }}
+                    </p>
+                    
+                    <div class="d-flex flex-wrap gap-2 mt-3 small">
+                        <span class="badge bg-light text-dark border"><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ o.ubicacion }}</span>
+                        <span class="badge bg-light text-dark border"><i class="bi bi-laptop text-primary me-1"></i>{{ o.modalidad }}</span>
+                        {% if o.sueldo %}
+                        <span class="badge bg-light text-dark border"><i class="bi bi-cash text-success me-1"></i>${{ o.sueldo }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-transparent border-0 pt-0 pb-3">
+                    {% if o.id in mis_postulaciones %}
+                        <button class="btn btn-secondary w-100 fw-bold" disabled>
+                            <i class="bi bi-check-circle me-2"></i>Ya Postulaste
+                        </button>
+                    {% else %}
+                        <form action="{% url 'practicas_e' %}" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="oferta_id" value="{{ o.id }}">
+                            <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm" onclick="return confirm('¿Confirmas tu postulación a {{ o.puesto_trabajo }} en {{ o.empresa.first_name }}?');">
+                                Postular Ahora <i class="bi bi-send ms-1"></i>
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
             </div>
         </div>
-        <p class="mb-2">{{ oferta }}</p>
-        <hr class="my-2">
-        <div class="d-flex justify-content-around">
-            <button class="btn btn-light btn-sm w-100 me-1" style="border-radius: 10px;">
-                <i class="bi bi-heart me-1"></i> {{ oferta }}
-            </button>
-            <button class="btn btn-light btn-sm w-100 ms-1" style="border-radius: 10px;">
-                <i class="bi bi-chat-right me-1"></i> {{ oferta}}
-            </button>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-emoji-frown fs-1 text-muted"></i>
+            <h5 class="mt-3 text-muted">Aún no hay ofertas disponibles</h5>
+            <p class="text-muted">Tu colegio aún no ha aprobado nuevas ofertas o no hay vacantes activas. ¡Revisa más tarde!</p>
         </div>
+        {% endfor %}
     </div>
-{% empty %}
-    <p class="text-center text-muted">No hay publicaciones aún.</p>
-{% endfor %}
+</div>
 {% endblock %}

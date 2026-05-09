@@ -19,12 +19,18 @@
     <div class="row g-4">
         {% for postulacion in postulaciones %}
         <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm border-0" style="border-radius: 15px;">
+            
+            <div class="card h-100 shadow border-0 bg-white
+                {% if postulacion.estado_solicitud == 'aceptada' %} border-top border-4 border-success
+                {% elif postulacion.estado_solicitud == 'rechazada' %} border-top border-4 border-danger
+                {% else %} border-top border-4 border-warning {% endif %}" 
+                style="border-radius: 15px; overflow: hidden;">
+                
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-3">
-                        <img src="{{ postulacion.usuario.get_avatar }}" class="rounded-circle me-3 border" width="60" height="60" style="object-fit: cover;">
+                        <img src="{{ postulacion.usuario.get_avatar }}" class="rounded-circle me-3 border shadow-sm" width="60" height="60" style="object-fit: cover;">
                         <div>
-                            <h6 class="fw-bold mb-0">{{ postulacion.usuario.first_name }} {{ postulacion.usuario.last_name }}</h6>
+                            <h6 class="fw-bold mb-0 text-dark">{{ postulacion.usuario.first_name }} {{ postulacion.usuario.last_name }}</h6>
                             <small class="text-muted"><i class="bi bi-bank me-1"></i>{{ postulacion.usuario.centro_educacional.nombre }}</small>
                         </div>
                     </div>
@@ -42,16 +48,27 @@
                         {% elif postulacion.estado_solicitud == 'rechazada' %}
                             <span class="badge bg-danger bg-opacity-10 text-danger border border-danger">Rechazado</span>
                         {% else %}
-                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning">Pendiente</span>
+                            <span class="badge bg-warning text-dark border border-warning">Pendiente</span>
                         {% endif %}
                     </div>
                 </div>
                 
                 {% if postulacion.estado_solicitud != 'aceptada' and postulacion.estado_solicitud != 'rechazada' %}
                 <div class="card-footer bg-transparent border-0 pt-0 pb-3">
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                        <a href="#" class="btn btn-outline-danger btn-sm w-100"><i class="bi bi-x-lg me-1"></i>Rechazar</a>
-                        <a href="#" class="btn btn-success btn-sm w-100"><i class="bi bi-check-lg me-1"></i>Aceptar</a>
+                    <div class="d-flex justify-content-between gap-2">
+                        <form action="{% url 'cambiar_estado_postulacion' postulacion.id 'rechazada' %}" method="POST" class="w-50">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger btn-sm w-100 fw-bold" onclick="return confirm('¿Seguro que deseas rechazar a este candidato?');">
+                                <i class="bi bi-x-circle me-1"></i>Rechazar
+                            </button>
+                        </form>
+                        
+                        <form action="{% url 'cambiar_estado_postulacion' postulacion.id 'aceptada' %}" method="POST" class="w-50">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success btn-sm w-100 fw-bold" onclick="return confirm('¿Confirmas que deseas aceptar a este candidato para el proceso?');">
+                                <i class="bi bi-check-circle me-1"></i>Aceptar
+                            </button>
+                        </form>
                     </div>
                 </div>
                 {% endif %}

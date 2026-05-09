@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, Count, Case, When
 from functools import wraps
 # from urllib import request
 import pandas as pd
@@ -125,29 +125,97 @@ def student(request):
 @login_required
 @perfil_requerido('estudiante')
 def notificaciones_e(request):
-    return render(request, "2_Estudiante/notificaciones.html")
+    notificaciones = models.Notificacion.objects.filter(
+        receptor=request.user
+    ).order_by('-fecha_creacion').select_related('actor')
+    
+    return render(request, "2_Estudiante/notificaciones.html", {"notificaciones": notificaciones})
 
 @login_required
 @perfil_requerido('estudiante')
 def practicas_e(request):
-    practicas = models.OfertaLaboral.objects.all()
-    context = {'tatata':practicas}
+    alumno = request.user
+    
+    if request.method == 'POST':
+        oferta_id = request.POST.get('oferta_id')
+        oferta = get_object_or_404(models.OfertaLaboral, id=oferta_id)
+        
+        ya_postulo = models.Postulacion.objects.filter(usuario=alumno, oferta_laboral=oferta).exists()
+        
+        if ya_postulo:
+            messages.warning(request, "Ya enviaste una solicitud para esta oferta.")
+        else:
+            models.Postulacion.objects.create(
+                usuario=alumno,
+                oferta_laboral=oferta,
+                estado_solicitud=models.EstadoSolicitud.PENDIENTE
+            )
+            messages.success(request, f"¡Postulación enviada exitosamente a {oferta.empresa.first_name}!")
+        return redirect('practicas_e')
+
+    ofertas_disponibles = models.OfertaLaboral.objects.filter(
+        colegio=alumno.centro_educacional,
+        estado_verificacion=models.EstadoVerificacion.APROBADO,
+        estado_oferta=models.EstadoOferta.ACTIVA 
+    ).order_by('-fecha_publicacion')
+
+    mis_postulaciones = models.Postulacion.objects.filter(usuario=alumno).values_list('oferta_laboral_id', flat=True)
+
+    context = {
+        'ofertas': ofertas_disponibles,
+        'mis_postulaciones': list(mis_postulaciones)
+    }
+    
     return render(request, "2_Estudiante/practicas.html", context)
 
 @login_required
 @perfil_requerido('estudiante')
 def empresas_e(request):
-    return render(request, "2_Estudiante/empresas.html")
+    mi_colegio = request.user.centro_educacional
+    
+    empresas_vinculadas = models.Usuario.objects.filter(
+        tipo_perfil=models.TipoPerfil.EMPRESA,
+        colegios_vinculados=mi_colegio
+    ).distinct()
+    
+    return render(request, "2_Estudiante/empresas.html", {"empresas": empresas_vinculadas})
 
 @login_required
 @perfil_requerido('estudiante')
 def tareas_e(request):
-    return render(request, "2_Estudiante/tareas.html")
+    materiales = models.ContenidoEducativo.objects.filter(
+        colegio=request.user.centro_educacional
+    ).order_by('-fecha_subida').prefetch_related('multimedia')
+    
+    return render(request, "2_Estudiante/tareas.html", {"materiales": materiales})
 
 @login_required
 @perfil_requerido('estudiante')
 def conexiones_e(request):
-    return render(request, "2_Estudiante/conexiones.html")
+    usuario = request.user
+    siguiendo = models.Conexion.objects.filter(
+        solicitante=usuario, 
+        estado_solicitud=models.EstadoSolicitud.ACEPTADA
+    ).select_related('receptor')
+
+    seguidores = models.Conexion.objects.filter(
+        receptor=usuario, 
+        estado_solicitud=models.EstadoSolicitud.ACEPTADA
+    ).select_related('solicitante')
+
+    return render(request, "2_Estudiante/conexiones.html", {
+        "siguiendo": siguiendo,
+        "seguidores": seguidores
+    })
+
+@login_required
+@perfil_requerido('estudiante')
+def mis_postulaciones_e(request):
+    mis_solicitudes = models.Postulacion.objects.filter(
+        usuario=request.user
+    ).select_related('oferta_laboral', 'oferta_laboral__empresa').order_by('-fecha_postulacion')
+    
+    return render(request, "2_Estudiante/mis_postulaciones.html", {"postulaciones": mis_solicitudes})
 
 #
 
@@ -266,7 +334,7 @@ def publicar_practica(request):
         else:
             messages.error(request, 'No tienes un convenio activo con este establecimiento.')
             
-    return redirect('dashboard_empresa')
+    return redirect('dashboard')
 
 @login_required
 @perfil_requerido('empresa')
@@ -322,7 +390,24 @@ def entrevistas_agendadas(request):
     
     return render(request, '3_Empresa/entrevistas.html', {'entrevistas': entrevistas})
 
-
+@login_required
+@perfil_requerido('empresa')
+def cambiar_estado_postulacion(request, postulacion_id, nuevo_estado):
+    if request.method == 'POST':
+        postulacion = get_object_or_404(models.Postulacion, id=postulacion_id, oferta_laboral__empresa=request.user)
+        
+        if nuevo_estado in [models.EstadoSolicitud.ACEPTADA, models.EstadoSolicitud.RECHAZADA]:
+            postulacion.estado_solicitud = nuevo_estado
+            postulacion.save()
+            
+            nombre_alumno = f"{postulacion.usuario.first_name} {postulacion.usuario.last_name}"
+            
+            if nuevo_estado == models.EstadoSolicitud.ACEPTADA:
+                messages.success(request, f'¡Has aceptado a {nombre_alumno}! Ya puedes contactarlo para la entrevista.')
+            else:
+                messages.warning(request, f'Has rechazado la solicitud de {nombre_alumno}.')
+                
+    return redirect('revisar_postulantes')
 
 
 
@@ -377,10 +462,8 @@ def administracion(request):
 def moderacionPerfil(request):
     mi_colegio = request.user.centro_educacional
     
-    # 3. Base de la búsqueda: Todos los usuarios de ESTE colegio, excepto a sí mismo
     usuarios_busqueda = models.Usuario.objects.filter(centro_educacional=mi_colegio).exclude(id=request.user.id)
     
-    # 4. Procesar la palabra escrita en el buscador (si existe)
     query = request.GET.get('q', '')
     if query:
         usuarios_busqueda = usuarios_busqueda.filter(
@@ -392,10 +475,9 @@ def moderacionPerfil(request):
         
     context = {
         'usuarios_busqueda': usuarios_busqueda,
-        'query': query,  # Devolvemos el query para mantenerlo en el input del HTML
+        'query': query,  
     }
     
-    # Renderizamos apuntando a la carpeta 4_Colegio
     return render(request, '4_Colegio/moderacionPerfil.html', context)
 
 @login_required
@@ -403,11 +485,18 @@ def moderacionPerfil(request):
 def cargar_estudiantes_excel(request):
     if request.method == "POST" and request.FILES.get("archivo_excel"):
         archivo = request.FILES["archivo_excel"]
+        
+        mi_colegio = request.user.centro_educacional
+        
+        if not mi_colegio:
+            messages.error(request, "Tu cuenta no tiene un Centro Educacional asociado para vincular alumnos.")
+            return redirect('moderacionPerfil')
+
         try:
             df = pd.read_excel(archivo)
+            estudiantes_creados = 0
             
             for _, row in df.iterrows():
-
                 user = models.Usuario.objects.create_user(
                     username=str(row['USUARIO']),
                     email=row['EMAIL'],
@@ -415,43 +504,59 @@ def cargar_estudiantes_excel(request):
                     first_name=row['NOMBRE'],
                     last_name=row['APELLIDO']
                 )
-
                 user.tipo_perfil = models.TipoPerfil.ESTUDIANTE
-                user.curso = row['CURSO']
-                user.fecha_nacimiento = row['FECHA_NACIMIENTO']
+                user.centro_educacional = mi_colegio
                 
+                if 'FECHA_NACIMIENTO' in row:
+                    user.fecha_nacimiento = row['FECHA_NACIMIENTO']
 
-                colegio = models.CentroEducacional.objects.get(nombre=row['CENTRO_EDUCACIONAL'])
-                user.centro_educacional = colegio
+                nombre_curso = str(row['CURSO'])
+                curso_obj = models.Curso.objects.filter(
+                    nombre__iexact=nombre_curso, 
+                    centro_educacional=mi_colegio
+                ).first()
                 
+                if curso_obj:
+                    user.curso = curso_obj
+
                 user.save()
+                estudiantes_creados += 1
                 
-            messages.success(request, f"Se cargaron {len(df)} estudiantes correctamente.")
+            messages.success(request, f"Se cargaron {estudiantes_creados} estudiantes exitosamente en {mi_colegio.nombre}.")
         except Exception as e:
-            messages.error(request, f"Error en carga de estudiantes: {str(e)}")
+            messages.error(request, f"Error durante la carga: {str(e)}")
             
     return redirect('moderacionPerfil')
 
 @login_required
 @perfil_requerido('colegio')
+@login_required
+@perfil_requerido('colegio')
 def cargar_empresas_excel(request):
     if request.method == "POST" and request.FILES.get("archivo_excel"):
         archivo = request.FILES["archivo_excel"]
+
+        mi_colegio = request.user.centro_educacional
+        
         try:
             df = pd.read_excel(archivo)
+            empresas_creadas = 0
             
             for _, row in df.iterrows():
                 user = models.Usuario.objects.create_user(
                     username=str(row['USUARIO']),
                     email=row['EMAIL'],
                     password=str(row['CONTRASEÑA']),
-                    first_name=row['NOMBRE'] # Para empresas solo usamos el primer nombre
+                    first_name=row['NOMBRE'],
+                    tipo_perfil=models.TipoPerfil.EMPRESA 
                 )
-                user.tipo_perfil = models.TipoPerfil.EMPRESA
-                # Aquí no asignamos curso ni colegio según tu lógica de empresas
-                user.save()
                 
-            messages.success(request, f"Se cargaron {len(df)} empresas correctamente.")
+                if mi_colegio:
+                    user.colegios_vinculados.add(mi_colegio)
+                
+                empresas_creadas += 1
+                
+            messages.success(request, f"Se cargaron {empresas_creadas} empresas y se generaron sus convenios automáticamente.")
         except Exception as e:
             messages.error(request, f"Error en carga de empresas: {str(e)}")
             
@@ -677,17 +782,14 @@ def vincular_empresa(request):
 @login_required
 @perfil_requerido('colegio')
 def aprobarPracticas(request):
-
     mi_colegio = request.user.centro_educacional
-    
-    # Traemos las ofertas enviadas a este colegio, ordenando las pendientes primero
     ofertas = models.OfertaLaboral.objects.filter(colegio=mi_colegio, es_practica=True).order_by(
-        models.Case(
-            models.When(estado_verificacion=models.EstadoVerificacion.PENDIENTE, then=0),
-            models.When(estado_verificacion=models.EstadoVerificacion.APROBADO, then=1),
+        Case(
+            When(estado_verificacion=models.EstadoVerificacion.PENDIENTE, then=0),
+            When(estado_verificacion=models.EstadoVerificacion.APROBADO, then=1),
             default=2
         ),
-        '-fecha_creacion'
+        '-fecha_publicacion' 
     )
 
     return render(request, '4_Colegio/aprobarPracticas.html', {'ofertas': ofertas})
@@ -697,10 +799,12 @@ def aprobarPracticas(request):
 def cambiar_estado_oferta(request, oferta_id, nuevo_estado):
     if request.method == 'POST':
         oferta = get_object_or_404(models.OfertaLaboral, id=oferta_id, colegio=request.user.centro_educacional)
+        
         if nuevo_estado in [models.EstadoVerificacion.APROBADO, models.EstadoVerificacion.RECHAZADO]:
-            oferta.estado = nuevo_estado
+            oferta.estado_verificacion = nuevo_estado 
             oferta.save()
-            messages.success(request, f'La oferta "{oferta.titulo}" ha sido {nuevo_estado.lower()}.')
+            messages.success(request, f'La oferta "{oferta.puesto_trabajo}" ha sido marcada como {nuevo_estado.lower()}.')
+            
     return redirect('aprobarPracticas')
 
 @login_required
@@ -840,42 +944,6 @@ def reporteEmpleabilidad(request):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# ===========================================================
-#                             VISTAS DE PRUEBAS
-# ===========================================================
-
-
-
-def testalert(request):
-    return render(request, "5_Alessandro/home.html")
 
 
 

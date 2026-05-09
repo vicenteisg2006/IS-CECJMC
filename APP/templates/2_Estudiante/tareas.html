@@ -1,13 +1,66 @@
-<!-- LLamada a Base + Nombre alumno -->
 {% extends "0_Bases/1base.html" %}
-{% load static %}
-{% block title %}{{ request.user.first_name }} {{ request.user.last_name }}{% endblock %}
+{% block title %}Material Educativo{% endblock %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-lg-8 col-md-8 mb-4">
-            <h2>Tareas</h2>
-            <p>Aquí puedes ver tus tareas asignadas por tus profesores. Mantente al día con tus responsabilidades académicas y organiza tu tiempo para cumplir con los plazos establecidos.</p>
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="fw-bold"><i class="bi bi-book me-2 text-dark"></i>Material Educativo</h2>
+            <p class="text-muted">Recursos, guías y videos compartidos por tus profesores para apoyar tu formación.</p>
         </div>
     </div>
+
+    <div class="row g-4">
+        {% for m in materiales %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow border-0 bg-white border-top border-4" style="border-radius: 15px; border-color: #6f42c1 !important;">
+                
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge bg-light text-dark border">
+                            <i class="bi bi-tag-fill me-1 text-primary"></i>Recurso
+                        </span>
+                        <small class="text-muted">{{ m.fecha_subida|date:"d M Y" }}</small>
+                    </div>
+
+                    <h5 class="fw-bold text-dark mt-2">{{ m.titulo }}</h5>
+                    <p class="small text-secondary" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                        {{ m.descripcion }}
+                    </p>
+
+                    <div class="mt-3">
+                        {% if m.url_video %}
+                            <div class="d-grid">
+                                <a href="{{ m.url_video }}" target="_blank" class="btn btn-outline-danger btn-sm fw-bold">
+                                    <i class="bi bi-play-btn-fill me-2"></i>Ver Video Tutorial
+                                </a>
+                            </div>
+                        {% endif %}
+
+                        {% if m.archivo_url %}
+                            <div class="d-grid {% if m.url_video %}mt-2{% endif %}">
+                                <a href="{{ m.archivo_url }}" download class="btn btn-outline-primary btn-sm fw-bold">
+                                    <i class="bi bi-file-earmark-arrow-down-fill me-2"></i>Descargar Material
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card-footer bg-light border-0 py-2">
+                    <small class="text-muted"><i class="bi bi-bank me-1"></i>{{ m.colegio.nombre }}</small>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="opacity-50">
+                <i class="bi bi-journal-x fs-1"></i>
+                <h5 class="mt-3">No hay material disponible</h5>
+                <p>Tu institución aún no ha subido recursos para tu nivel. ¡Vuelve pronto!</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

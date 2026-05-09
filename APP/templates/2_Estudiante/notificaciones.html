@@ -1,13 +1,58 @@
-<!-- LLamada a Base + Nombre alumno -->
 {% extends "0_Bases/1base.html" %}
-{% load static %}
-{% block title %}{{ request.user.first_name }} {{ request.user.last_name }}{% endblock %}
+{% block title %}Mis Notificaciones{% endblock %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-lg-8 col-md-8 mb-4">
-            <h2>Notificaciones</h2>
-            <p>Aquí puedes ver tus notificaciones importantes. Mantente al día con las actualizaciones y comunicados de tu institución educativa.</p>
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="fw-bold"><i class="bi bi-bell me-2 text-warning"></i>Centro de Notificaciones</h2>
+            <p class="text-muted">Mantente al tanto de tus postulaciones, nuevas conexiones e interacciones en la comunidad.</p>
         </div>
     </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-grid gap-3">
+                {% for n in notificaciones %}
+                <div class="card shadow-sm border-0 bg-white border-start border-4 border-warning" style="border-radius: 12px;">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="me-3 position-relative">
+                            <img src="{{ n.actor.get_avatar }}" class="rounded-circle border" width="50" height="50" style="object-fit: cover;">
+                            <span class="position-absolute bottom-0 end-0 badge rounded-circle bg-warning p-1 border border-white">
+                                {% if "postulacion" in n.tipo_accion.lower %}
+                                    <i class="bi bi-briefcase-fill text-dark" style="font-size: 0.6rem;"></i>
+                                {% elif "like" in n.tipo_accion.lower %}
+                                    <i class="bi bi-heart-fill text-dark" style="font-size: 0.6rem;"></i>
+                                {% else %}
+                                    <i class="bi bi-person-fill text-dark" style="font-size: 0.6rem;"></i>
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <p class="mb-0 text-dark" style="font-size: 0.9rem;">
+                                    <span class="fw-bold">{{ n.actor.first_name }} {{ n.actor.last_name }}</span> 
+                                    {{ n.tipo_accion }}
+                                </p>
+                                <small class="text-muted" style="font-size: 0.75rem;">{{ n.fecha_creacion|timesince }}</small>
+                            </div>
+                        </div>
+
+                        <div class="ms-3">
+                            <a href="#" class="btn btn-light btn-sm rounded-circle"><i class="bi bi-chevron-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-5 opacity-50">
+                    <i class="bi bi-bell-slash fs-1"></i>
+                    <h5 class="mt-3">Todo al día</h5>
+                    <p>No tienes notificaciones nuevas en este momento.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
