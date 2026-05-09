@@ -5,22 +5,21 @@
 {% block content %}
 <div class="container-fluid py-4">
     <div class="row mb-4 align-items-center">
-            <div class="col-lg-5 col-md-12 mb-3 mb-lg-0">
-                <h2 class="fw-bold">Gestión de Alumnos</h2>
-                <p class="text-muted mb-0">Administra la información académica de los estudiantes.</p>
-            </div>
-            <div class="col-lg-7 col-md-12 text-lg-end">
-                <button type="button" class="btn btn-primary me-2 mb-2 mb-md-0" data-bs-toggle="modal" data-bs-target="#modalCrearCurso">
-                    <i class="bi bi-plus-circle me-1"></i> Nuevo Curso
-                </button>
-                
-                <form action="{% url 'gestionarAlumnos' %}" method="GET" class="d-inline-block align-middle" style="max-width: 250px;">
-                    <div class="input-group">
-                        <input type="text" class="form-control" name="q" value="{{ query }}" placeholder="Buscar alumno">
-                        <button class="btn btn-dark" type="submit"><i class="bi bi-search"></i></button>
-                    </div>
-                </form>
-            </div>
+        <div class="col-lg-5 col-md-12 mb-3 mb-lg-0">
+            <h2 class="fw-bold">Gestión de Alumnos</h2>
+            <p class="text-muted mb-0">Administra la información académica y especialidades de los estudiantes.</p>
+        </div>
+        <div class="col-lg-7 col-md-12 text-lg-end">
+            <button type="button" class="btn btn-primary me-2 mb-2 mb-md-0" data-bs-toggle="modal" data-bs-target="#modalCrearCurso">
+                <i class="bi bi-plus-circle me-1"></i> Nuevo Curso
+            </button>
+            
+            <form action="{% url 'gestionarAlumnos' %}" method="GET" class="d-inline-block align-middle" style="max-width: 250px;">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="q" value="{{ query }}" placeholder="Buscar alumno">
+                    <button class="btn btn-dark" type="submit"><i class="bi bi-search"></i></button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -33,6 +32,7 @@
                             <th class="ps-4">Estudiante</th>
                             <th>Correo</th>
                             <th>Curso Actual</th>
+                            <th>Especialidad</th>
                             <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
@@ -49,16 +49,28 @@
                             <td>
                                 <span class="badge bg-light text-dark border">{{ a.curso.nombre|default:"No asignado" }}</span>
                             </td>
+                            <td>
+                                {% for comp_est in a.competenciaestudiante_set.all %}
+                                    {% if comp_est.estado_verificacion == 'aprobado' and comp_est.competencia.tipo_competencia == 'especialidad' %}
+                                        <span class="badge bg-info text-dark">{{ comp_est.competencia.competencia }}</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
                             <td class="text-center">
-                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalCurso{{ a.id }}">
-                                    <i class="bi bi-pencil-square me-1"></i> Editar Curso
-                                </button>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalCurso{{ a.id }}" title="Editar Curso">
+                                        <i class="bi bi-book"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalEspecialidad{{ a.id }}" title="Asignar Especialidad">
+                                        <i class="bi bi-tools"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
 
                         <div class="modal fade" id="modalCurso{{ a.id }}" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
+                                <div class="modal-content" style="border-radius: 15px;">
                                     <div class="modal-header border-0">
                                         <h5 class="modal-title fw-bold">Actualizar Curso</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -67,21 +79,15 @@
                                         {% csrf_token %}
                                         <div class="modal-body">
                                             <p class="small text-muted">Estudiante: <strong>{{ a.first_name }} {{ a.last_name }}</strong></p>
-                                            
                                             <label class="form-label fw-bold">Seleccionar Curso</label>
                                             <select name="nuevo_curso" class="form-select" required>
                                                 <option value="" disabled {% if not a.curso %}selected{% endif %}>Selecciona un curso...</option>
-                                                
                                                 {% for c in cursos %}
                                                     <option value="{{ c.id }}" {% if a.curso and a.curso.id == c.id %}selected{% endif %}>
                                                         {{ c.nombre }}
                                                     </option>
                                                 {% endfor %}
                                             </select>
-                                            
-                                            <div class="form-text mt-2" style="font-size: 0.75rem;">
-                                                Si el curso no aparece, debe ser creado por el administrador en la base de datos.
-                                            </div>
                                         </div>
                                         <div class="modal-footer border-0">
                                             <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
@@ -91,9 +97,41 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="modal fade" id="modalEspecialidad{{ a.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content" style="border-radius: 15px;">
+                                    <div class="modal-header border-0">
+                                        <h5 class="modal-title fw-bold">Asignar Especialidad</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form action="{% url 'asignar_especialidad_alumno' a.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <div class="modal-body">
+                                            <p class="small text-muted">Estudiante: <strong>{{ a.first_name }} {{ a.last_name }}</strong></p>
+                                            <label class="form-label fw-bold">Seleccionar Especialidad Técnica</label>
+                                            <select name="especialidad_id" class="form-select" required>
+                                                <option value="" disabled selected>-- Elige una mención --</option>
+                                                {% for esp in especialidades_del_colegio %}
+                                                    <option value="{{ esp.id }}">{{ esp.competencia }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <div class="form-text mt-2" style="font-size: 0.75rem;">
+                                                <i class="bi bi-info-circle me-1"></i>Solo aparecen las especialidades que el colegio declaró impartir.
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer border-0">
+                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-primary">Guardar Especialidad</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
                         {% empty %}
                         <tr>
-                            <td colspan="4" class="text-center py-5 text-muted">No se encontraron alumnos.</td>
+                            <td colspan="5" class="text-center py-5 text-muted">No se encontraron alumnos registrados.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -114,12 +152,7 @@
                 {% csrf_token %}
                 <div class="modal-body">
                     <label class="form-label fw-bold text-muted small">Nombre del Curso / Nivel</label>
-                    <input type="text" name="nombre_curso" class="form-control" placeholder="Ej: 5to Medio" style="text-transform: capitalize;" required>
-                    
-                    <div class="form-text mt-2" style="font-size: 0.75rem;">
-                        <i class="bi bi-info-circle me-1"></i>
-                        Este curso estará disponible inmediatamente para ser asignado a cualquier estudiante de tu institución.
-                    </div>
+                    <input type="text" name="nombre_curso" class="form-control" placeholder="Ej: 4to Medio B" style="text-transform: capitalize;" required>
                 </div>
                 <div class="modal-footer border-0 pt-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>

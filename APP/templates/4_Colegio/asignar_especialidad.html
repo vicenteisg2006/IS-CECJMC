@@ -1,0 +1,16 @@
+<form method="POST" class="card p-4 shadow-sm border-0" style="border-radius: 15px;">
+    {% csrf_token %}
+    <h5 class="fw-bold mb-3">Asignar Especialidad a {{ estudiante.first_name }}</h5>
+    
+    <div class="mb-3">
+        <label class="form-label text-muted">Seleccione la mención / especialidad:</label>
+        <select name="especialidad_id" class="form-select" required>
+            <option value="" disabled selected>-- Elige una especialidad --</option>
+            {% for esp in especialidades %}
+                <option value="{{ esp.id }}">{{ esp.competencia }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100 fw-bold">Guardar Especialidad</button>
+</form>

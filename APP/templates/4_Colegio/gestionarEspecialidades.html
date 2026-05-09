@@ -4,9 +4,14 @@
 {% block content %}
 <div class="container-fluid py-4">
     <div class="row mb-4 align-items-center">
-        <div class="col-md-8">
+        <div class="col-md-7">
             <h2 class="fw-bold"><i class="bi bi-tools me-2 text-primary"></i>Especialidades del Centro</h2>
-            <p class="text-muted">Selecciona las carreras o especialidades técnicas que imparte tu institución. Esto ayudará a las empresas a encontrarlos.</p>
+            <p class="text-muted">Marca las especialidades técnicas que imparte tu institución o crea una nueva si no aparece en la lista.</p>
+        </div>
+        <div class="col-md-5 text-md-end">
+            <button type="button" class="btn btn-dark fw-bold" data-bs-toggle="modal" data-bs-target="#modalCrearEspecialidad">
+                <i class="bi bi-plus-circle me-1"></i> Nueva Especialidad
+            </button>
         </div>
     </div>
 
@@ -30,14 +35,40 @@
                         </div>
                     </div>
                     {% empty %}
-                    <div class="col-12 text-center text-muted py-3">
-                        No hay especialidades registradas en el sistema maestro de REL+.
+                    <div class="col-12 text-center text-muted py-5">
+                        <i class="bi bi-search fs-1"></i>
+                        <p class="mt-3">Aún no hay especialidades cargadas en el sistema maestro.</p>
                     </div>
                     {% endfor %}
                 </div>
                 
+                {% if todas %}
                 <div class="mt-4 text-end">
-                    <button type="submit" class="btn btn-primary px-5">Guardar Especialidades</button>
+                    <button type="submit" class="btn btn-primary px-5 fw-bold">Guardar Selección</button>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCrearEspecialidad" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 15px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Añadir Nueva Especialidad</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p class="small text-muted">Escribe el nombre de la especialidad técnica. Si ya existe en el sistema, se vinculará automáticamente a tu colegio.</p>
+                    <label class="form-label fw-bold text-muted small">Nombre de la Mención</label>
+                    <input type="text" name="nueva_especialidad" class="form-control" placeholder="Ej: Electrónica Industrial" required>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Crear y Vincular</button>
                 </div>
             </form>
         </div>

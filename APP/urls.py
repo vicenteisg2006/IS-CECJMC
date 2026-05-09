@@ -17,6 +17,7 @@ urlpatterns = [
     path('tareas/', views.tareas_e, name='tareas_e'),
     path('conexiones/', views.conexiones_e, name='conexiones_e'),
     path('mis-postulaciones/', views.mis_postulaciones_e, name='mis_postulaciones_e'),
+    path('estudiante/descargar-cv/', views.descargar_cv_e, name='descargar_cv_e'),
 
     #Vistas Colegio
     path('school/', views.school, name='school'), #school
@@ -48,6 +49,8 @@ urlpatterns = [
     path('administracion/config/especialidades/', views.gestionarEspecialidades, name='gestionarEspecialidades'),
     path('administracion/config/contenido/', views.gestionarContenidoEducativo, name='gestionarContenidoEducativo'),
     path('administracion/config/exportar/', views.exportarDatosExcel, name='exportarDatosExcel'),
+
+    path('colegio/asignar-especialidad/<int:estudiante_id>/', views.asignar_especialidad_alumno, name='asignar_especialidad_alumno'),
     
     #Vistas Empresa
     path('business/', views.business, name='business'), #business

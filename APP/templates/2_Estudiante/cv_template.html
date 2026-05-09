@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        @page { size: letter; margin: 1.5cm; }
+        body { font-family: Helvetica, Arial, sans-serif; color: #333; line-height: 1.4; }
+        .header { text-align: left; border-bottom: 2px solid #2c3e50; padding-bottom: 15px; }
+        .name { font-size: 24pt; font-weight: bold; color: #2c3e50; margin: 0; }
+        .title { font-size: 14pt; color: #7f8c8d; font-weight: bold; margin-top: 5px; }
+        .contact { font-size: 9pt; color: #34495e; margin-top: 5px; }
+        
+        .section { margin-top: 20px; }
+        .section-title { 
+            background-color: #f8f9fa; 
+            padding: 5px 10px; 
+            font-size: 11pt; 
+            font-weight: bold; 
+            border-left: 4px solid #2c3e50;
+            text-transform: uppercase;
+        }
+        
+        .item { margin-bottom: 12px; margin-top: 8px; }
+        .item-title { font-weight: bold; font-size: 10pt; }
+        .item-subtitle { color: #7f8c8d; font-size: 9pt; font-style: italic; }
+        .item-desc { font-size: 9.5pt; text-align: justify; margin-top: 3px; }
+        
+        .skill-badge { background-color: #e9ecef; padding: 2px 8px; border-radius: 10px; font-size: 8pt; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="name">{{ u.first_name }} {{ u.last_name }}</h1>
+        <div class="title">
+            {% if especialidad %} Técnico en {{ especialidad.competencia }} {% else %} Estudiante Técnico {% endif %}
+        </div>
+        <div class="contact">
+            {{ u.email }} | {{ u.telefono|default:"Sin teléfono" }} | {{ u.direccion|default:"Santiago, Chile" }}
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Perfil Profesional</div>
+        <div class="item-desc">
+            {{ u.bio|default:"Estudiante técnico proactivo con formación en el área industrial, orientado al aprendizaje continuo y al desarrollo de competencias prácticas certificadas por su institución educativa." }}
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Formación Académica</div>
+        <div class="item">
+            <div class="item-title">{{ u.centro_educacional.nombre }}</div>
+            <div class="item-subtitle">Cursando {{ u.curso.nombre|default:"Nivel Técnico" }}</div>
+        </div>
+    </div>
+
+    {% if experiencias %}
+    <div class="section">
+        <div class="section-title">Experiencia y Prácticas</div>
+        {% for exp in experiencias %}
+        <div class="item">
+            <div class="item-title">{{ exp.obtener_nombre_empresa }} - {{ exp.contacto|default:"Práctica Profesional" }}</div>
+            <div class="item-subtitle">{{ exp.fecha_inicio|date:"M Y" }} – {% if exp.fecha_termino %}{{ exp.fecha_termino|date:"M Y" }}{% else %}Presente{% endif %}</div>
+            {% if exp.es_practica %} <div class="item-desc">Práctica profesional validada por el centro educacional.</div> {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if habilidades %}
+    <div class="section">
+        <div class="section-title">Habilidades Técnicas</div>
+        <div class="item-desc">
+            {% for h in habilidades %}
+                • {{ h.habilidad.habilidad }} ({{ h.competencia }})<br>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div style="margin-top: 40px; text-align: center; font-size: 8pt; color: #bdc3c7; border-top: 1px solid #eee; padding-top: 10px;">
+        Este documento es una certificación oficial de la Red de Vinculación Laboral REL+. <br>
+        Validado por {{ u.centro_educacional.nombre }} a fecha de {{ hoy|date:"d F Y" }}.
+    </div>
+</body>
+</html>

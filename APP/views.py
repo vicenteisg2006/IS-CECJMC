@@ -2,10 +2,15 @@ from django.contrib.auth import authenticate, login as auth_login, logout, updat
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
-from django.contrib import messages
 from django.db.models import Q, Count, Case, When
+from django.template.loader import get_template
+from django.contrib.staticfiles import finders
+from django.contrib import messages
+from django.conf import settings
 from functools import wraps
 # from urllib import request
+from xhtml2pdf import pisa
+from datetime import date
 import pandas as pd
 from . import models
 import openpyxl
@@ -13,6 +18,7 @@ import json
 import random
 import string
 import csv
+import os
 
 # ===========================================================
 #                                MEDIDAS DE SEGURIDAD
@@ -217,6 +223,45 @@ def mis_postulaciones_e(request):
     
     return render(request, "2_Estudiante/mis_postulaciones.html", {"postulaciones": mis_solicitudes})
 
+@login_required
+@perfil_requerido('estudiante')
+def descargar_cv_e(request):
+    u = request.user
+    
+    especialidad = models.CompetenciaEstudiante.objects.filter(
+        estudiante=u, 
+        estado_verificacion=models.EstadoVerificacion.APROBADO,
+        competencia__tipo_competencia=models.TipoCompetencia.ESPECIALIDAD
+    ).first()
+
+    experiencias = models.ExperienciaLaboral.objects.filter(
+        usuario=u,
+        estado_verificacion=models.EstadoVerificacion.APROBADO
+    ).order_by('-fecha_inicio')
+
+    habilidades = models.HabilidadUsuario.objects.filter(
+        usuario=u,
+        estado_verificacion=models.EstadoVerificacion.APROBADO
+    )
+
+    context = {
+        'u': u,
+        'especialidad': especialidad.competencia if especialidad else None,
+        'experiencias': experiencias,
+        'habilidades': habilidades,
+        'hoy': date.today(),
+    }
+    
+    template_path = '2_Estudiante/cv_template.html'
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="CV_{u.first_name}_{u.last_name}.pdf"'
+    
+    template = get_template(template_path)
+    html = template.render(context)
+    pisa_status = pisa.CreatePDF(html, dest=response, link_callback=link_callback)
+    
+    return response
+
 #
 
 
@@ -404,11 +449,18 @@ def cambiar_estado_postulacion(request, postulacion_id, nuevo_estado):
             
             if nuevo_estado == models.EstadoSolicitud.ACEPTADA:
                 messages.success(request, f'¡Has aceptado a {nombre_alumno}! Ya puedes contactarlo para la entrevista.')
+                mensaje_notificacion = "ha aceptado tu postulación para la práctica."
             else:
                 messages.warning(request, f'Has rechazado la solicitud de {nombre_alumno}.')
-                
+                mensaje_notificacion = "ha declinado tu postulación en esta ocasión."
+            
+            models.Notificacion.objects.create(
+                receptor=postulacion.usuario, 
+                actor=request.user,      
+                tipo_accion=mensaje_notificacion
+            )
+            
     return redirect('revisar_postulantes')
-
 
 
 
@@ -628,7 +680,7 @@ def gestionarAlumnos(request):
         tipo_perfil__iexact='estudiante'
     ).order_by('last_name')
 
-    query = request.GET.get('q', '') # Capturamos lo que el usuario escribió
+    query = request.GET.get('q', '') 
     if query:
         alumnos = alumnos.filter(
             Q(first_name__icontains=query) | 
@@ -637,10 +689,12 @@ def gestionarAlumnos(request):
             Q(username__icontains=query)
         )
     cursos_disponibles = models.Curso.objects.filter(centro_educacional=mi_colegio)
+    especialidades = request.user.centro_educacional.especialidades.all()
 
     context = {
         'alumnos': alumnos,
         'cursos': cursos_disponibles,
+        'especialidades_del_colegio': especialidades,
         'query': query 
     }
     return render(request, '4_Colegio/gestionarAlumnos.html', context)
@@ -848,19 +902,38 @@ def redEgresados(request):
 @login_required
 @perfil_requerido('colegio')
 def gestionarEspecialidades(request):
-    mi_colegio = request.user.centro_educacional
+    colegio = request.user.centro_educacional
+    todas_especialidades = models.Competencia.objects.filter(
+        tipo_competencia=models.TipoCompetencia.ESPECIALIDAD
+    ).order_by('competencia')
+    
+    mias = colegio.especialidades.all()
+
     if request.method == 'POST':
-        especialidades_ids = request.POST.getlist('especialidades')
-        mi_colegio.especialidades.set(especialidades_ids)
-        messages.success(request, "Especialidades actualizadas correctamente.")
+        # ACCIÓN A: Crear una nueva especialidad
+        if 'nueva_especialidad' in request.POST:
+            nombre = request.POST.get('nueva_especialidad').strip()
+            if nombre:
+                especialidad, created = models.Competencia.objects.get_or_create(
+                    competencia__iexact=nombre,
+                    defaults={
+                        'competencia': nombre, 
+                        'tipo_competencia': models.TipoCompetencia.ESPECIALIDAD
+                    }
+                )
+                
+                colegio.especialidades.add(especialidad)
+                messages.success(request, f"Especialidad '{nombre}' añadida correctamente.")
+            return redirect('gestionarEspecialidades')
+
+        ids_seleccionadas = request.POST.getlist('especialidades')
+        colegio.especialidades.set(ids_seleccionadas)
+        messages.success(request, "Lista de especialidades actualizada.")
         return redirect('gestionarEspecialidades')
-    
-    todas_especialidades = models.Competencia.objects.filter(tipo_competencia='ESP')
-    mis_especialidades = mi_colegio.especialidades.all()
-    
+
     return render(request, '4_Colegio/gestionarEspecialidades.html', {
         'todas': todas_especialidades,
-        'mias': mis_especialidades
+        'mias': mias
     })
 
 @login_required
@@ -934,7 +1007,37 @@ def reporteEmpleabilidad(request):
     }
     return render(request, '4_Colegio/reporteEmpleabilidad.html', context)
 
+@login_required
+@perfil_requerido('colegio')
+def asignar_especialidad_alumno(request, estudiante_id):
+    estudiante = get_object_or_404(
+        models.Usuario, 
+        id=estudiante_id, 
+        centro_educacional=request.user.centro_educacional,
+        tipo_perfil=models.TipoPerfil.ESTUDIANTE
+    )
 
+    especialidades_disponibles = request.user.centro_educacional.especialidades.all()
+
+    if request.method == 'POST':
+        competencia_id = request.POST.get('especialidad_id')
+        especialidad_seleccionada = get_object_or_404(models.Competencia, id=competencia_id)
+
+        models.CompetenciaEstudiante.objects.update_or_create(
+            estudiante=estudiante,
+            competencia=especialidad_seleccionada,
+            defaults={
+                'estado_verificacion': models.EstadoVerificacion.APROBADO 
+            }
+        )
+
+        messages.success(request, f'Se asignó la especialidad {especialidad_seleccionada.competencia} a {estudiante.first_name}.')
+        return redirect('gestionarAlumnos') 
+
+    return render(request, '3_Colegio/asignar_especialidad.html', {
+        'estudiante': estudiante,
+        'especialidades': especialidades_disponibles
+    })
 
 
 
@@ -1027,6 +1130,8 @@ def actualizar_perfil(request):
         if nuevo_apellido is not None:
             user.last_name = nuevo_apellido
         
+        user.bio = request.POST.get('bio')
+        
         user.save()
         messages.success(request, "Perfil actualizado.")
     return redirect('ver_perfil')
@@ -1098,3 +1203,29 @@ def descargar_datos_json(request):
     
     return response
 
+@login_required
+def link_callback(uri, rel):
+    result = finders.find(uri)
+    if result:
+        if not isinstance(result, (list, tuple)):
+            result = [result]
+        result = list(os.path.realpath(path) for path in result)
+        path = result[0]
+    else:
+        s_url = settings.STATIC_URL
+        s_root = settings.STATIC_ROOT
+        m_url = settings.MEDIA_URL
+        m_root = settings.MEDIA_ROOT
+
+        if uri.startswith(m_url):
+            path = os.path.join(m_root, uri.replace(m_url, ""))
+        elif uri.startswith(s_url):
+            path = os.path.join(s_root, uri.replace(s_url, ""))
+        else:
+            return uri
+
+    if not os.path.isfile(path):
+        raise Exception('media URI must exist on disk')
+    return path
+    
+#

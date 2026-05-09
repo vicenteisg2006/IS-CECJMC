@@ -121,6 +121,27 @@
                                         <input type="text" class="form-control bg-light" value="{{ user.curso|default:'No asignado' }}" readonly>
                                     </div>
                                     {% endif %}
+
+                                    {% if user.tipo_perfil|upper == 'ESTUDIANTE' %}
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold small">Centro Educacional</label>
+                                        <input type="text" class="form-control bg-light" value="{{ user.centro_educacional.nombre }}" readonly>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold small">Curso / Nivel</label>
+                                        <input type="text" class="form-control bg-light" value="{{ user.curso|default:'No asignado' }}" readonly>
+                                    </div>
+                                    
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold small">Perfil Profesional (Bio)</label>
+                                        <textarea name="bio" class="form-control" rows="4" 
+                                            placeholder="Describe tus habilidades, intereses y qué buscas en una práctica..."
+                                            style="border-radius: 10px;">{{ user.bio|default_if_none:"" }}</textarea>
+                                        <div class="form-text" style="font-size: 0.75rem;">
+                                            <i class="bi bi-info-circle me-1"></i>Este texto aparecerá en la parte superior de tu CV descargable.
+                                        </div>
+                                    </div>
+                                    {% endif %}
                                 </div>
 
                                 <div class="d-grid gap-2 mt-5">
