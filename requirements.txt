@@ -4,6 +4,7 @@ botocore==1.43.3
 Django==6.0.3
 django-debug-toolbar==6.3.0
 django-jazzmin==3.0.4
+django-s3direct==2.0.3
 django-storages==1.14.6
 et_xmlfile==2.0.0
 git-filter-repo==2.47.0

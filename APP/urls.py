@@ -17,7 +17,6 @@ urlpatterns = [
     path('tareas/', views.tareas_e, name='tareas_e'),
     path('conexiones/', views.conexiones_e, name='conexiones_e'),
 
-
     #Vistas Colegio
     path('school/', views.school, name='school'), #school
     path('administracion/', views.administracion, name='administracion'), #administracion
@@ -71,7 +70,11 @@ urlpatterns = [
     path('mi-perfil/descargar-datos/', views.descargar_datos_json, name='descargar_datos_json'),
 
 
-    path('testalert/', views.testalert, name='testalert')
+    path('testalert/', views.testalert, name='testalert'),
+
+    # s3 direct and lambda callback
+    path('s3direct/', include('s3direct.urls')),
+    path('api/media/', include('APP.urls_media')),
 ]
 
 if settings.DEBUG:

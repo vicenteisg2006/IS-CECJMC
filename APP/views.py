@@ -9,6 +9,7 @@ from functools import wraps
 import pandas as pd
 from . import models
 import openpyxl
+import json
 import random
 import string
 import csv
@@ -762,19 +763,33 @@ def gestionarEspecialidades(request):
 @perfil_requerido('colegio')
 def gestionarContenidoEducativo(request):
     mi_colegio = request.user.centro_educacional
+    
     if request.method == 'POST':
-        titulo = request.POST.get('titulo')
-        descripcion = request.POST.get('descripcion')
-        url = request.POST.get('url_video')
-        models.ContenidoEducativo.objects.create(
+        # Handle JSON (from new s3direct flow)
+        try:
+            data = json.loads(request.body)
+        except (json.JSONDecodeError, Exception):
+            data = request.POST
+
+        titulo = data.get('titulo')
+        descripcion = data.get('descripcion')
+
+        if not titulo or not descripcion:
+            return JsonResponse({'ok': False, 'error': 'Faltan campos requeridos'}, status=400)
+
+        contenido = models.ContenidoEducativo.objects.create(
             colegio=mi_colegio,
             titulo=titulo,
             descripcion=descripcion,
-            url_video=url
+            # url_video removed — multimedia handled separately via S3
         )
-        messages.success(request, "Recurso educativo publicado para tus alumnos.")
-        
-    contenidos = models.ContenidoEducativo.objects.filter(colegio=mi_colegio).order_by('-fecha_subida')
+        return JsonResponse({'ok': True, 'contenido_id': contenido.id})  # was post_id
+
+    # GET
+    contenidos = models.ContenidoEducativo.objects.filter(
+        colegio=mi_colegio
+    ).order_by('-fecha_subida').prefetch_related('multimedia')
+    
     return render(request, '4_Colegio/gestionarContenido.html', {'contenidos': contenidos})
 
 @login_required

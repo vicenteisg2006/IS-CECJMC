@@ -25,6 +25,30 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+AWS_S3_BUCKET_NAME = 'relplus-bucket-116580070059-us-east-1-an'  # Replace with your bucket name
+AWS_S3_REGION = 'us-east-1'  # Replace with your region
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_S3_BUCKET_NAME}.s3.amazonaws.com'
+
+LAMBDA_CALLBACK_SECRET = os.getenv('LAMBDA_CALLBACK_SECRET')
+
+S3DIRECT_DESTINATIONS = {
+    'multimedia_upload': {
+        'key': 'uploads/',
+        'auth': lambda u: u.is_authenticated,  # only logged in users
+        'allowed_types': [
+            'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+            'image/heic', 'image/heif', 'image/bmp', 'image/tiff',
+            'video/mp4', 'video/quicktime', 'video/x-msvideo',
+            'video/webm', 'video/x-matroska',
+        ],
+        'allowed_extensions': [
+            '.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic', '.heif',
+            '.bmp', '.tiff', '.mp4', '.mov', '.avi', '.webm', '.mkv',
+        ],
+        'content_length_range': (1, 524288000),  # 1 byte to 500MB
+        'cache_control': 'max-age=2592000',
+    },
+}
 
 ALLOWED_HOSTS = [
     'relplus.cloud-ip.cc',
@@ -52,7 +76,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'APP', #La APP creada
+    'APP',
+    's3direct', #La APP creada
 ]
 
 MIDDLEWARE = [

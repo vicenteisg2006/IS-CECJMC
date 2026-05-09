@@ -1,75 +1,264 @@
 {% extends "0_Bases/3base.html" %}
+{% load s3direct %}
 {% block title %}Material Educativo{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
-    <div class="row mb-4 align-items-center">
-        <div class="col-md-8">
-            <h2 class="fw-bold"><i class="bi bi-play-btn me-2 text-danger"></i>Material Educativo</h2>
-            <p class="text-muted">Sube recursos, guías o videos para preparar a tus estudiantes para el mundo laboral.</p>
-        </div>
-        <div class="col-md-4 text-md-end">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalSubirContenido">
-                <i class="bi bi-cloud-arrow-up me-2"></i>Subir Recurso
-            </button>
-        </div>
+  <div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+      <h2 class="fw-bold"><i class="bi bi-play-btn me-2 text-danger"></i>Material Educativo</h2>
+      <p class="text-muted">Sube recursos, guías o videos para preparar a tus estudiantes para el mundo laboral.</p>
     </div>
+    <div class="col-md-4 text-md-end">
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalSubirContenido">
+        <i class="bi bi-cloud-arrow-up me-2"></i>Subir Recurso
+      </button>
+    </div>
+  </div>
 
-    <div class="row g-4">
-        {% for contenido in contenidos %}
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm border-0" style="border-radius: 15px;">
-                <div class="card-body">
-                    <h5 class="fw-bold">{{ contenido.titulo }}</h5>
-                    <small class="text-muted d-block mb-3"><i class="bi bi-calendar3 me-1"></i>{{ contenido.fecha_subida|date:"d M Y" }}</small>
-                    <p class="small">{{ contenido.descripcion|truncatewords:20 }}</p>
-                    
-                    {% if contenido.url_video %}
-                    <a href="{{ contenido.url_video }}" target="_blank" class="btn btn-outline-danger btn-sm w-100 mt-auto">
-                        <i class="bi bi-youtube me-1"></i> Ver Video
-                    </a>
-                    {% endif %}
+  <div class="row g-4">
+    {% for contenido in contenidos %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100 shadow-sm border-0" style="border-radius: 15px;">
+        <div class="card-body">
+          <h5 class="fw-bold">{{ contenido.titulo }}</h5>
+          <small class="text-muted d-block mb-3">
+            <i class="bi bi-calendar3 me-1"></i>{{ contenido.fecha_subida|date:"d M Y" }}
+          </small>
+          <p class="small">{{ contenido.descripcion|truncatewords:20 }}</p>
+
+          {% if contenido.multimedia.exists %}
+            {% with media=contenido.multimedia.first %}
+              {% if media.status == 'pending' %}
+                <div class="alert alert-warning py-1 small">
+                  <i class="bi bi-hourglass-split me-1"></i> Comprimiendo archivo...
                 </div>
-            </div>
+              {% elif media.status == 'ready' %}
+                {% if media.tipo_multimedia == 'video' %}
+                  <video controls class="w-100 mt-2" style="border-radius:8px;">
+                    <source src="{{ media.url }}" type="video/mp4">
+                  </video>
+                {% else %}
+                  <img src="{{ media.url }}" class="img-fluid mt-2" style="border-radius:8px;">
+                {% endif %}
+              {% elif media.status == 'error' %}
+                <div class="alert alert-danger py-1 small">
+                  <i class="bi bi-exclamation-triangle me-1"></i> Error al procesar archivo.
+                </div>
+              {% endif %}
+            {% endwith %}
+          {% endif %}
+
         </div>
-        {% empty %}
-        <div class="col-12 text-center py-5 text-muted">
-            <i class="bi bi-collection-play fs-1"></i>
-            <p class="mt-2">Aún no has subido material educativo para tus alumnos.</p>
-        </div>
-        {% endfor %}
+      </div>
     </div>
+    {% empty %}
+    <div class="col-12 text-center py-5 text-muted">
+      <i class="bi bi-collection-play fs-1"></i>
+      <p class="mt-2">Aún no has subido material educativo para tus alumnos.</p>
+    </div>
+    {% endfor %}
+  </div>
 </div>
 
+<!-- Modal -->
 <div class="modal fade" id="modalSubirContenido" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 15px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold">Nuevo Recurso Educativo</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 15px;">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">Nuevo Recurso Educativo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <!-- Step 1: text fields + file upload -->
+      <div id="formStep1">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fw-bold text-muted small">Título del Recurso</label>
+            <input type="text" id="inputTitulo" class="form-control" placeholder="Ej: Cómo armar un buen CV" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold text-muted small">Descripción</label>
+            <textarea id="inputDescripcion" class="form-control" rows="3" placeholder="Breve resumen del contenido..." required></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold text-muted small">Archivo (imagen o video)</label>
+            <!-- s3direct widget renders here -->
+            {% s3direct 'multimedia_upload' as s3url %}
+            <div id="s3direct-wrapper">
+              <input type="hidden" id="s3-uploaded-url" value="">
+              <input type="file" id="s3direct-file" class="form-control"
+                     accept="image/*,video/*">
+              <div id="upload-progress" class="mt-2 d-none">
+                <div class="progress">
+                  <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
+                       style="width: 0%"></div>
+                </div>
+                <small class="text-muted mt-1 d-block" id="upload-status">Subiendo...</small>
+              </div>
             </div>
-            <form action="{% url 'gestionarContenidoEducativo' %}" method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-muted small">Título del Recurso</label>
-                        <input type="text" name="titulo" class="form-control" placeholder="Ej: Cómo armar un buen CV" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-muted small">Descripción</label>
-                        <textarea name="descripcion" class="form-control" rows="3" placeholder="Breve resumen del contenido..." required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-muted small">URL del Video (Opcional)</label>
-                        <input type="url" name="url_video" class="form-control" placeholder="Enlace de YouTube o Vimeo">
-                    </div>
-                </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Publicar</button>
-                </div>
-            </form>
+          </div>
         </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btnPublicar" disabled>
+            <span id="btnText">Selecciona un archivo primero</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: processing indicator -->
+      <div id="formStep2" class="d-none">
+        <div class="modal-body text-center py-5">
+          <div class="spinner-border text-primary mb-3" role="status"></div>
+          <h6 class="fw-bold">Publicando recurso...</h6>
+          <p class="text-muted small">Esto solo tomará un momento.</p>
+        </div>
+      </div>
+
     </div>
+  </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const CSRF_TOKEN = '{{ csrf_token }}';
+  const POST_ID = '{{ post_id }}';  // pass this from your view
+  let uploadedS3Url = null;
+
+  const fileInput    = document.getElementById('s3direct-file');
+  const progressWrap = document.getElementById('upload-progress');
+  const progressBar  = document.getElementById('progress-bar');
+  const uploadStatus = document.getElementById('upload-status');
+  const btnPublicar  = document.getElementById('btnPublicar');
+  const btnText      = document.getElementById('btnText');
+
+  fileInput.addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+
+    // Show progress bar
+    progressWrap.classList.remove('d-none');
+    btnPublicar.disabled = true;
+    btnText.textContent = 'Subiendo archivo...';
+
+    // Get presigned URL from s3direct
+    fetch('/s3direct/get_upload_params/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': CSRF_TOKEN,
+      },
+      body: new URLSearchParams({
+        dest: 'multimedia_upload',
+        filename: file.name,
+        type: file.type,
+        size: file.size,
+      })
+    })
+    .then(r => r.json())
+    .then(params => {
+      // Build FormData for S3 direct upload
+      const formData = new FormData();
+      Object.entries(params.fields).forEach(([k, v]) => formData.append(k, v));
+      formData.append('file', file);
+
+      // Upload directly to S3 with progress tracking
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', params.url);
+
+      xhr.upload.addEventListener('progress', function(e) {
+        if (e.lengthComputable) {
+          const pct = Math.round((e.loaded / e.total) * 100);
+          progressBar.style.width = pct + '%';
+          uploadStatus.textContent = `Subiendo... ${pct}%`;
+        }
+      });
+
+      xhr.addEventListener('load', function() {
+        if (xhr.status === 204 || xhr.status === 201) {
+          // Success — build the final S3 URL
+          uploadedS3Url = `${params.url}${params.fields.key}`;
+          progressBar.style.width = '100%';
+          progressBar.classList.remove('progress-bar-animated');
+          progressBar.classList.add('bg-success');
+          uploadStatus.textContent = '✓ Archivo listo';
+          btnPublicar.disabled = false;
+          btnText.textContent = 'Publicar';
+        } else {
+          uploadStatus.textContent = '✗ Error al subir archivo. Intenta de nuevo.';
+          progressBar.classList.add('bg-danger');
+          btnPublicar.disabled = false;
+          btnText.textContent = 'Reintentar';
+        }
+      });
+
+      xhr.send(formData);
+    })
+    .catch(err => {
+      console.error(err);
+      uploadStatus.textContent = '✗ Error de conexión.';
+    });
+  });
+
+  // Publish button — step 2
+  btnPublicar.addEventListener('click', function() {
+    const titulo = document.getElementById('inputTitulo').value.trim();
+    const descripcion = document.getElementById('inputDescripcion').value.trim();
+
+    if (!titulo || !descripcion) {
+      alert('Por favor completa el título y la descripción.');
+      return;
+    }
+    if (!uploadedS3Url) {
+      alert('Por favor sube un archivo primero.');
+      return;
+    }
+
+    // Show step 2 spinner
+    document.getElementById('formStep1').classList.add('d-none');
+    document.getElementById('formStep2').classList.remove('d-none');
+
+    // 1. Create the ContenidoEducativo post
+    fetch("{% url 'gestionarContenidoEducativo' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': CSRF_TOKEN,
+      },
+      body: JSON.stringify({ titulo, descripcion })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (!data.ok) throw new Error(data.error || 'Error al crear contenido');
+
+      // 2. Register the multimedia with the new post id
+    return fetch('/api/media/upload/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': CSRF_TOKEN,
+        },
+        body: JSON.stringify({
+            url: uploadedS3Url,
+            contenido_id: data.contenido_id,  // changed from post_id
+        })
+    });
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) {
+        // Reload page to show new content card
+        window.location.reload();
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert('Ocurrió un error. Por favor intenta de nuevo.');
+      document.getElementById('formStep1').classList.remove('d-none');
+      document.getElementById('formStep2').classList.add('d-none');
+    });
+  });
+</script>
 {% endblock %}

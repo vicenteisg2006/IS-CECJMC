@@ -234,10 +234,39 @@ class Like(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
+class ContenidoEducativo(models.Model):
+    colegio = models.ForeignKey(CentroEducacional, on_delete=models.CASCADE, related_name='material_educativo')
+    titulo = models.CharField(max_length=200)
+    descripcion = models.TextField()
+    url_video = models.URLField(blank=True, null=True, help_text="Enlace de YouTube o Vimeo")
+    # Reverted archivo FileField to archivo_url URLField for resources
+    archivo_url = models.URLField(max_length=500, blank=True, null=True)
+    fecha_subida = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.titulo} - {self.colegio.nombre}"
+
 class Multimedia(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='multimedia')
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('ready', 'Ready'),
+        ('error', 'Error'),
+    ]
+    # Make post nullable since not all multimedia belongs to a Post
+    post = models.ForeignKey(
+        Post, on_delete=models.CASCADE, 
+        related_name='multimedia',
+        null=True, blank=True
+    )
+    # Add ContenidoEducativo link
+    contenido_educativo = models.ForeignKey(
+        ContenidoEducativo, on_delete=models.CASCADE,
+        related_name='multimedia',
+        null=True, blank=True
+    )
     url = models.URLField(max_length=500)
     tipo_multimedia = models.CharField(max_length=50)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     fecha_publicacion = models.DateTimeField(auto_now_add=True)
 
 class Comentario(models.Model):
@@ -268,14 +297,3 @@ class Notificacion(models.Model):
         verbose_name = "Notificación"
         verbose_name_plural = "Notificaciones"
 
-class ContenidoEducativo(models.Model):
-    colegio = models.ForeignKey(CentroEducacional, on_delete=models.CASCADE, related_name='material_educativo')
-    titulo = models.CharField(max_length=200)
-    descripcion = models.TextField()
-    url_video = models.URLField(blank=True, null=True, help_text="Enlace de YouTube o Vimeo")
-    # Reverted archivo FileField to archivo_url URLField for resources
-    archivo_url = models.URLField(max_length=500, blank=True, null=True)
-    fecha_subida = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.titulo} - {self.colegio.nombre}"
