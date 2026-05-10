@@ -57,7 +57,16 @@ def compression_callback(request):
         data = json.loads(request.body)
     except json.JSONDecodeError:
         return JsonResponse({'error': 'invalid json'}, status=400)
+    # TEMPORARY DEBUG - remove after fixing
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.error(f"Callback received: {data}")
+    logger.error(f"Expected secret: {repr(settings.LAMBDA_CALLBACK_SECRET)}")
+    logger.error(f"Received secret: {repr(data.get('secret'))}")
+    logger.error(f"Match: {data.get('secret') == settings.LAMBDA_CALLBACK_SECRET}")
 
+    if data.get('secret') != settings.LAMBDA_CALLBACK_SECRET:
+        return JsonResponse({'error': 'unauthorized'}, status=401)
     # Verify secret
     if data.get('secret') != settings.LAMBDA_CALLBACK_SECRET:
         return JsonResponse({'error': 'unauthorized'}, status=401)
