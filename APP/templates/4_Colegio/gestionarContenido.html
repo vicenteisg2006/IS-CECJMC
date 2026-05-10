@@ -118,7 +118,6 @@
   </div>
 </div>
 {% endblock %}
-
 {% block extra_js %}
 <script>
   function getCookie(name) {
@@ -134,10 +133,9 @@
         }
     }
     return cookieValue;
-}
+  }
 
-const CSRF_TOKEN = getCookie('csrftoken');
-  const POST_ID = '{{ post_id }}';  // pass this from your view
+  const CSRF_TOKEN = getCookie('csrftoken');
   let uploadedS3Url = null;
 
   const fileInput    = document.getElementById('s3direct-file');
@@ -151,103 +149,36 @@ const CSRF_TOKEN = getCookie('csrftoken');
     const file = this.files[0];
     if (!file) return;
 
-    // Show progress bar
     progressWrap.classList.remove('d-none');
     btnPublicar.disabled = true;
     btnText.textContent = 'Subiendo archivo...';
 
-
-  fetch('/s3direct/get_upload_params/', {
-    method: 'POST',
-    headers: {
+    fetch('/s3direct/get_upload_params/', {
+      method: 'POST',
+      headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'X-CSRFToken': CSRF_TOKEN,
-    },
-    body: new URLSearchParams({
+      },
+      body: new URLSearchParams({
         dest: 'multimedia_upload',
         name: file.name,
         type: file.type,
         size: file.size,
+      })
     })
-})
-.then(function(response) {
-    console.log('response status:', response.status);
-    return response.text();
-})
-.then(function(text) {
-    console.log('response body:', text);
-})
-.catch(function(err) {
-    console.log('fetch error:', err);
-});
-    // Get presigned URL from s3direct
-    // fetch('/s3direct/get_upload_params/', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/x-www-form-urlencoded',
-    //     'X-CSRFToken': CSRF_TOKEN,
-    //   },
-    //   body: new URLSearchParams({
-    //     dest: 'multimedia_upload',
-    //     name: file.name,
-    //     type: file.type,
-    //     size: file.size,
-    //   })
-    // })
-    
-    // .then(r => r.json())
-    // .then(params => {
-    //   // Build FormData for S3 direct upload
-    //   const formData = new FormData();
-    //   Object.entries(params.fields).forEach(([k, v]) => formData.append(k, v));
-    //   formData.append('file', file);
+    .then(function(response) {
+      console.log('response status:', response.status);
+      return response.text();
+    })
+    .then(function(text) {
+      console.log('response body:', text);
+    })
+    .catch(function(err) {
+      console.log('fetch error:', err);
+    });
 
-    //   // Upload directly to S3 with progress tracking
-    //   const xhr = new XMLHttpRequest();
-    //   xhr.open('POST', params.url);
+  }); // <-- this closes the change handler
 
-    //   xhr.upload.addEventListener('progress', function(e) {
-    //     if (e.lengthComputable) {
-    //       const pct = Math.round((e.loaded / e.total) * 100);
-    //       progressBar.style.width = pct + '%';
-    //       uploadStatus.textContent = `Subiendo... ${pct}%`;
-    //     }
-    //   });
-
-    //   xhr.addEventListener('load', function() {
-    //     if (xhr.status === 204 || xhr.status === 201) {
-    //       // Success — build the final S3 URL
-    //       uploadedS3Url = `${params.url}${params.fields.key}`;
-    //       progressBar.style.width = '100%';
-    //       progressBar.classList.remove('progress-bar-animated');
-    //       progressBar.classList.add('bg-success');
-    //       uploadStatus.textContent = '✓ Archivo listo';
-    //       btnPublicar.disabled = false;
-    //       btnText.textContent = 'Publicar';
-    //     } else {
-    //       uploadStatus.textContent = '✗ Error al subir archivo. Intenta de nuevo.';
-    //       progressBar.classList.add('bg-danger');
-    //       btnPublicar.disabled = false;
-    //       btnText.textContent = 'Reintentar';
-    //     }
-    //   });
-
-    //   xhr.send(formData);
-    // })
-  //   .then(r => {
-  //   console.log('status:', r.status);
-  //   return r.text();  // use text() instead of json() to see raw response
-  //   })
-  //   .then(raw => {
-  //       console.log('raw response:', raw);
-  //   })
-  //   .catch(err => {
-  //     console.error(err);
-  //     uploadStatus.textContent = '✗ Error de conexión.';
-  //   });
-  // });
-
-  // Publish button — step 2
   btnPublicar.addEventListener('click', function() {
     const titulo = document.getElementById('inputTitulo').value.trim();
     const descripcion = document.getElementById('inputDescripcion').value.trim();
@@ -261,11 +192,9 @@ const CSRF_TOKEN = getCookie('csrftoken');
       return;
     }
 
-    // Show step 2 spinner
     document.getElementById('formStep1').classList.add('d-none');
     document.getElementById('formStep2').classList.remove('d-none');
 
-    // 1. Create the ContenidoEducativo post
     fetch("{% url 'gestionarContenidoEducativo' %}", {
       method: 'POST',
       headers: {
@@ -277,26 +206,21 @@ const CSRF_TOKEN = getCookie('csrftoken');
     .then(r => r.json())
     .then(data => {
       if (!data.ok) throw new Error(data.error || 'Error al crear contenido');
-
-      // 2. Register the multimedia with the new post id
-    return fetch('/api/media/upload/', {
+      return fetch('/api/media/upload/', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': CSRF_TOKEN,
+          'Content-Type': 'application/json',
+          'X-CSRFToken': CSRF_TOKEN,
         },
         body: JSON.stringify({
-            url: uploadedS3Url,
-            contenido_id: data.contenido_id,  // changed from post_id
+          url: uploadedS3Url,
+          contenido_id: data.contenido_id,
         })
-    });
+      });
     })
     .then(r => r.json())
     .then(data => {
-      if (data.ok) {
-        // Reload page to show new content card
-        window.location.reload();
-      }
+      if (data.ok) window.location.reload();
     })
     .catch(err => {
       console.error(err);
