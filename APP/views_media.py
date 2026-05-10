@@ -57,19 +57,19 @@ def compression_callback(request):
         data = json.loads(request.body)
     except json.JSONDecodeError:
         return JsonResponse({'error': 'invalid json'}, status=400)
-    # TEMPORARY DEBUG - remove after fixing
-    import logging
-    logger = logging.getLogger(__name__)
-    logger.error(f"Callback received: {data}")
-    logger.error(f"Expected secret: {repr(settings.LAMBDA_CALLBACK_SECRET)}")
-    logger.error(f"Received secret: {repr(data.get('secret'))}")
-    logger.error(f"Match: {data.get('secret') == settings.LAMBDA_CALLBACK_SECRET}")
+    # # TEMPORARY DEBUG - remove after fixing
+    # import logging
+    # logger = logging.getLogger(__name__)
+    # logger.error(f"Callback received: {data}")
+    # logger.error(f"Expected secret: {repr(settings.LAMBDA_CALLBACK_SECRET)}")
+    # logger.error(f"Received secret: {repr(data.get('secret'))}")
+    # logger.error(f"Match: {data.get('secret') == settings.LAMBDA_CALLBACK_SECRET}")
 
-    if data.get('secret') != settings.LAMBDA_CALLBACK_SECRET:
-        return JsonResponse({'error': 'unauthorized'}, status=401)
-    # Verify secret
-    if data.get('secret') != settings.LAMBDA_CALLBACK_SECRET:
-        return JsonResponse({'error': 'unauthorized'}, status=401)
+    # if data.get('secret') != settings.LAMBDA_CALLBACK_SECRET:
+    #     return JsonResponse({'error': 'unauthorized'}, status=401)
+    # # Verify secret
+    # if data.get('secret') != settings.LAMBDA_CALLBACK_SECRET:
+    #     return JsonResponse({'error': 'unauthorized'}, status=401)
 
     filename = data.get('filename')
     status = data.get('status')
@@ -90,18 +90,18 @@ def compression_callback(request):
 
         # Find the pending Multimedia record and update it
         # (we'll create it as 'pending' from the upload view below)
-        # try:
-        #     multimedia = Multimedia.objects.get(
-        #         url__contains=os.path.splitext(os.path.basename(original_key))[0],
-        #         tipo_multimedia='pending'
-        #     )
-        #     multimedia.url = compressed_url
-        #     multimedia.tipo_multimedia = tipo
-        #     multimedia.save()
-        # except Multimedia.DoesNotExist:
-        #     # If not found, create it (fallback)
-        #     # You'd need post_id somehow — better to pass it from upload view
-        #     pass
+        try:
+            multimedia = Multimedia.objects.get(
+                url__contains=os.path.splitext(os.path.basename(original_key))[0],
+                tipo_multimedia='pending'
+            )
+            multimedia.url = compressed_url
+            multimedia.tipo_multimedia = tipo
+            multimedia.save()
+        except Multimedia.DoesNotExist:
+            # If not found, create it (fallback)
+            # You'd need post_id somehow — better to pass it from upload view
+            pass
         logger.error(f"Looking for url containing: {os.path.splitext(os.path.basename(original_key))[0]}")
         try:
             multimedia = Multimedia.objects.get(
