@@ -8,7 +8,8 @@ from .models import Multimedia, Post
 import boto3
 import uuid
 import os
-
+import logging
+logger = logging.getLogger(__name__)
 @login_required
 def get_upload_url(request):
     if request.method != 'POST':
@@ -49,7 +50,6 @@ def get_upload_url(request):
 
 @csrf_exempt
 def compression_callback(request):
-    """Lambda calls this when compression is done."""
     if request.method != 'POST':
         return JsonResponse({'error': 'method not allowed'}, status=405)
 
@@ -57,39 +57,23 @@ def compression_callback(request):
         data = json.loads(request.body)
     except json.JSONDecodeError:
         return JsonResponse({'error': 'invalid json'}, status=400)
-    # # TEMPORARY DEBUG - remove after fixing
-    # import logging
-    # logger = logging.getLogger(__name__)
-    # logger.error(f"Callback received: {data}")
-    # logger.error(f"Expected secret: {repr(settings.LAMBDA_CALLBACK_SECRET)}")
-    # logger.error(f"Received secret: {repr(data.get('secret'))}")
-    # logger.error(f"Match: {data.get('secret') == settings.LAMBDA_CALLBACK_SECRET}")
 
-    # if data.get('secret') != settings.LAMBDA_CALLBACK_SECRET:
-    #     return JsonResponse({'error': 'unauthorized'}, status=401)
-    # # Verify secret
-    # if data.get('secret') != settings.LAMBDA_CALLBACK_SECRET:
-    #     return JsonResponse({'error': 'unauthorized'}, status=401)
+    if data.get('secret') != settings.LAMBDA_CALLBACK_SECRET:
+        return JsonResponse({'error': 'unauthorized'}, status=401)
 
     filename = data.get('filename')
     status = data.get('status')
     original_key = data.get('original_key')
 
     if status == 'ok':
-        # Build the final compressed URL
         compressed_key = 'compressed/' + original_key.split('uploads/', 1)[-1]
-        # Handle format change (heic → jpg etc)
         compressed_key = os.path.splitext(compressed_key)[0] + os.path.splitext(filename)[1]
-        
         compressed_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{compressed_key}"
 
-        # Determine tipo_multimedia
         ext = os.path.splitext(filename)[1].lower()
         video_exts = {'.mp4', '.mov', '.avi', '.webm', '.mkv', '.flv', '.wmv'}
         tipo = 'video' if ext in video_exts else 'imagen'
 
-        # Find the pending Multimedia record and update it
-        # (we'll create it as 'pending' from the upload view below)
         try:
             multimedia = Multimedia.objects.get(
                 url__contains=os.path.splitext(os.path.basename(original_key))[0],
@@ -97,26 +81,24 @@ def compression_callback(request):
             )
             multimedia.url = compressed_url
             multimedia.tipo_multimedia = tipo
+            multimedia.status = 'ready'  # ← this was missing!
             multimedia.save()
+            logger.info(f"Updated multimedia {multimedia.id} to ready")
         except Multimedia.DoesNotExist:
-            # If not found, create it (fallback)
-            # You'd need post_id somehow — better to pass it from upload view
-            pass
-        logger.error(f"Looking for url containing: {os.path.splitext(os.path.basename(original_key))[0]}")
+            logger.error("Multimedia record NOT FOUND")
+        except Exception as e:
+            logger.error(f"Error updating multimedia: {e}")
+
+    elif status == 'error':
         try:
             multimedia = Multimedia.objects.get(
                 url__contains=os.path.splitext(os.path.basename(original_key))[0],
                 tipo_multimedia='pending'
             )
-            logger.error(f"Found multimedia: {multimedia.id}, url: {multimedia.url}")
-        except Multimedia.DoesNotExist:
-            logger.error("Multimedia record NOT FOUND")
+            multimedia.status = 'error'
+            multimedia.save()
         except Exception as e:
-            logger.error(f"Error finding multimedia: {e}")
-
-    elif status == 'error':
-        # Optionally mark it as failed in your DB
-        pass
+            logger.error(f"Error marking multimedia as failed: {e}")
 
     return JsonResponse({'ok': True})
 
