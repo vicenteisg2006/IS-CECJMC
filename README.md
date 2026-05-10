@@ -7,6 +7,12 @@ Integrantes:
 - Vicente Ignacio Sepúlveda Guajardo
 
 &nbsp;
+## Sobre el Proyecto
+Este proyecto, como parte del curso Ingeniería de Software, busca desarrollar una plataforma web para el Centro Educacional Cardenal José María Caro, con el objetivo de formar una red educacional-profesional en que alumnos y empresas puedan darse a conocer, solucionando así los distintos problemas planteados que afectan a la comunidad educativa.
+
+Para el desarrollo de dicho proyecto, se usaron una serie de herramientas como Django, AWS, MySql, etc. Para ofrecer una solución de nivel profesional, completa, y escalable.
+
+&nbsp;
 ## Requisitos 
 * Git
 * Pip
@@ -41,7 +47,14 @@ Para levantar el proyecto desde tu dispositivo debes:
     >python manage.py migrate
 
 &nbsp;
-## Rules
+
+5) Instalar los requerimientos del sistema
+
+    >pip install -r requitements.txt
+ 
+
+&nbsp;
+## Rules para los desarolladores
 1) No trabajar sobre MAIN:
 
     Se debe crear una rama para cada tarea:
