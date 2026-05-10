@@ -157,7 +157,7 @@ const CSRF_TOKEN = getCookie('csrftoken');
     btnText.textContent = 'Subiendo archivo...';
 
 
-    fetch('/s3direct/get_upload_params/', {
+  fetch('/s3direct/get_upload_params/', {
     method: 'POST',
     headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -180,7 +180,7 @@ const CSRF_TOKEN = getCookie('csrftoken');
 .catch(function(err) {
     console.log('fetch error:', err);
 });
-    // // Get presigned URL from s3direct
+    // Get presigned URL from s3direct
     // fetch('/s3direct/get_upload_params/', {
     //   method: 'POST',
     //   headers: {
@@ -234,18 +234,18 @@ const CSRF_TOKEN = getCookie('csrftoken');
 
     //   xhr.send(formData);
     // })
-    .then(r => {
-    console.log('status:', r.status);
-    return r.text();  // use text() instead of json() to see raw response
-    })
-    .then(raw => {
-        console.log('raw response:', raw);
-    })
-    .catch(err => {
-      console.error(err);
-      uploadStatus.textContent = '✗ Error de conexión.';
-    });
-  });
+  //   .then(r => {
+  //   console.log('status:', r.status);
+  //   return r.text();  // use text() instead of json() to see raw response
+  //   })
+  //   .then(raw => {
+  //       console.log('raw response:', raw);
+  //   })
+  //   .catch(err => {
+  //     console.error(err);
+  //     uploadStatus.textContent = '✗ Error de conexión.';
+  //   });
+  // });
 
   // Publish button — step 2
   btnPublicar.addEventListener('click', function() {
