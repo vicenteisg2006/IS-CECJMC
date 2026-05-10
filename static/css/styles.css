@@ -1,0 +1,18 @@
+/* Estilos personalizados de VICENTE */
+
+.titulito1-navbar {
+    color:           #ffffff;
+    font-size:      1.7rem;
+    font-family:    'Courier New', Courier, monospace;
+    font-weight:    bold;
+}
+
+.titulito2-navbar {
+    color: #46627e;
+}
+
+.fotito1-navbar {
+    width:          40px;
+    height:         40px;
+    object-fit:     cover;
+}
