@@ -171,43 +171,50 @@ const CSRF_TOKEN = getCookie('csrftoken');
       })
     })
     .then(r => r.json())
-    .then(params => {
-      // Build FormData for S3 direct upload
-      const formData = new FormData();
-      Object.entries(params.fields).forEach(([k, v]) => formData.append(k, v));
-      formData.append('file', file);
+    // .then(params => {
+    //   // Build FormData for S3 direct upload
+    //   const formData = new FormData();
+    //   Object.entries(params.fields).forEach(([k, v]) => formData.append(k, v));
+    //   formData.append('file', file);
 
-      // Upload directly to S3 with progress tracking
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', params.url);
+    //   // Upload directly to S3 with progress tracking
+    //   const xhr = new XMLHttpRequest();
+    //   xhr.open('POST', params.url);
 
-      xhr.upload.addEventListener('progress', function(e) {
-        if (e.lengthComputable) {
-          const pct = Math.round((e.loaded / e.total) * 100);
-          progressBar.style.width = pct + '%';
-          uploadStatus.textContent = `Subiendo... ${pct}%`;
-        }
-      });
+    //   xhr.upload.addEventListener('progress', function(e) {
+    //     if (e.lengthComputable) {
+    //       const pct = Math.round((e.loaded / e.total) * 100);
+    //       progressBar.style.width = pct + '%';
+    //       uploadStatus.textContent = `Subiendo... ${pct}%`;
+    //     }
+    //   });
 
-      xhr.addEventListener('load', function() {
-        if (xhr.status === 204 || xhr.status === 201) {
-          // Success — build the final S3 URL
-          uploadedS3Url = `${params.url}${params.fields.key}`;
-          progressBar.style.width = '100%';
-          progressBar.classList.remove('progress-bar-animated');
-          progressBar.classList.add('bg-success');
-          uploadStatus.textContent = '✓ Archivo listo';
-          btnPublicar.disabled = false;
-          btnText.textContent = 'Publicar';
-        } else {
-          uploadStatus.textContent = '✗ Error al subir archivo. Intenta de nuevo.';
-          progressBar.classList.add('bg-danger');
-          btnPublicar.disabled = false;
-          btnText.textContent = 'Reintentar';
-        }
-      });
+    //   xhr.addEventListener('load', function() {
+    //     if (xhr.status === 204 || xhr.status === 201) {
+    //       // Success — build the final S3 URL
+    //       uploadedS3Url = `${params.url}${params.fields.key}`;
+    //       progressBar.style.width = '100%';
+    //       progressBar.classList.remove('progress-bar-animated');
+    //       progressBar.classList.add('bg-success');
+    //       uploadStatus.textContent = '✓ Archivo listo';
+    //       btnPublicar.disabled = false;
+    //       btnText.textContent = 'Publicar';
+    //     } else {
+    //       uploadStatus.textContent = '✗ Error al subir archivo. Intenta de nuevo.';
+    //       progressBar.classList.add('bg-danger');
+    //       btnPublicar.disabled = false;
+    //       btnText.textContent = 'Reintentar';
+    //     }
+    //   });
 
-      xhr.send(formData);
+    //   xhr.send(formData);
+    // })
+    .then(r => {
+    console.log('status:', r.status);
+    return r.text();  // use text() instead of json() to see raw response
+    })
+    .then(raw => {
+        console.log('raw response:', raw);
     })
     .catch(err => {
       console.error(err);
