@@ -157,7 +157,6 @@ else:
     # Call the function to get the dictionary of credentials
     try:
         db_credentials = get_db_secret()
-        print("AWS RETURNED THIS:", db_credentials)  # <--- ADD THIS LINE
     except Exception as e:
         print(f"Warning: Could not load Secrets Manager. {e}")
         db_credentials = {}
