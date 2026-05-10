@@ -90,18 +90,29 @@ def compression_callback(request):
 
         # Find the pending Multimedia record and update it
         # (we'll create it as 'pending' from the upload view below)
+        # try:
+        #     multimedia = Multimedia.objects.get(
+        #         url__contains=os.path.splitext(os.path.basename(original_key))[0],
+        #         tipo_multimedia='pending'
+        #     )
+        #     multimedia.url = compressed_url
+        #     multimedia.tipo_multimedia = tipo
+        #     multimedia.save()
+        # except Multimedia.DoesNotExist:
+        #     # If not found, create it (fallback)
+        #     # You'd need post_id somehow — better to pass it from upload view
+        #     pass
+        logger.error(f"Looking for url containing: {os.path.splitext(os.path.basename(original_key))[0]}")
         try:
             multimedia = Multimedia.objects.get(
                 url__contains=os.path.splitext(os.path.basename(original_key))[0],
                 tipo_multimedia='pending'
             )
-            multimedia.url = compressed_url
-            multimedia.tipo_multimedia = tipo
-            multimedia.save()
+            logger.error(f"Found multimedia: {multimedia.id}, url: {multimedia.url}")
         except Multimedia.DoesNotExist:
-            # If not found, create it (fallback)
-            # You'd need post_id somehow — better to pass it from upload view
-            pass
+            logger.error("Multimedia record NOT FOUND")
+        except Exception as e:
+            logger.error(f"Error finding multimedia: {e}")
 
     elif status == 'error':
         # Optionally mark it as failed in your DB
