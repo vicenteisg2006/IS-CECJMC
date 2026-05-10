@@ -172,8 +172,10 @@
       if (!response.ok) throw new Error('Error obteniendo parámetros de subida');
       return response.json();
     })
+    
     .then(function(params) {
       // Step 2: upload directly to S3
+      console.log('full params:', JSON.stringify(params));
       const formData = new FormData();
       Object.keys(params.fields).forEach(function(k) {
         formData.append(k, params.fields[k]);
