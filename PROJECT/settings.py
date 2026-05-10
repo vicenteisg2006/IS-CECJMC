@@ -23,6 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # # URL pública para acceder a las fotos
 # MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/'
+env_path = os.path.join(BASE_DIR, '.env')
+load_dotenv(env_path)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 AWS_STORAGE_BUCKET_NAME = 'relplus-bucket-116580070059-us-east-1-an'  # Replace with your bucket name
@@ -59,8 +61,6 @@ ALLOWED_HOSTS = [
 ]
 
 # SECURITY WARNING: keep the secret key used in production secret!
-env_path = os.path.join(BASE_DIR, '.env')
-load_dotenv(env_path)
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'production')
 SECRET_KEY = os.getenv('SECRET_KEY')
 
