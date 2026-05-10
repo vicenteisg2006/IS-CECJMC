@@ -1,5 +1,4 @@
 {% extends "0_Bases/3base.html" %}
-{% load s3direct %}
 {% block title %}Material Educativo{% endblock %}
 
 {% block content %}
@@ -84,7 +83,6 @@
           <div class="mb-3">
             <label class="form-label fw-bold text-muted small">Archivo (imagen o video)</label>
             <!-- s3direct widget renders here -->
-            {% s3direct 'multimedia_upload' as s3url %}
             <div id="s3direct-wrapper">
               <input type="hidden" id="s3-uploaded-url" value="">
               <input type="file" id="s3direct-file" class="form-control"
