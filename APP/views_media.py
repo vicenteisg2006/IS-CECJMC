@@ -5,6 +5,46 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from .models import Multimedia, Post
+import boto3
+import uuid
+import os
+
+@login_required
+def get_upload_url(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'method not allowed'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except:
+        return JsonResponse({'error': 'invalid json'}, status=400)
+
+    filename = data.get('name')
+    file_type = data.get('type')
+
+    if not filename or not file_type:
+        return JsonResponse({'error': 'missing fields'}, status=400)
+
+    ext = os.path.splitext(filename)[1].lower()
+    unique_key = f"uploads/{uuid.uuid4().hex}{ext}"
+
+    s3 = boto3.client('s3', region_name='us-east-1')
+    presigned = s3.generate_presigned_post(
+        Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+        Key=unique_key,
+        Fields={'Content-Type': file_type},
+        Conditions=[
+            {'Content-Type': file_type},
+            ['content-length-range', 1, 524288000],
+        ],
+        ExpiresIn=3600
+    )
+
+    return JsonResponse({
+        'url': presigned['url'],
+        'fields': presigned['fields'],
+        'key': unique_key,
+    })
 
 
 @csrf_exempt
