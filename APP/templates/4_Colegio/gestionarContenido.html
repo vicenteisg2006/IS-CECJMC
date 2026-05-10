@@ -173,56 +173,53 @@
       return response.json();
     })
     
-    .then(function(params) {
-      // Step 2: upload directly to S3
-      console.log('full params:', JSON.stringify(params));
-      const formData = new FormData();
-      Object.keys(params.fields).forEach(function(k) {
-        formData.append(k, params.fields[k]);
-      });
-      formData.append('file', file);
+.then(function(params) {
+  console.log('full params:', JSON.stringify(params));
+  
+  const formData = new FormData();
+  formData.append('key', params.object_key);
+  formData.append('AWSAccessKeyId', params.access_key_id);
+  formData.append('x-amz-security-token', params.session_token);
+  formData.append('acl', params.acl);
+  formData.append('Cache-Control', params.cache_control);
+  formData.append('file', file);
 
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', params.endpoint);
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', params.endpoint + '/' + params.bucket);
 
-      // Progress bar
-      xhr.upload.addEventListener('progress', function(e) {
-        if (e.lengthComputable) {
-          const pct = Math.round((e.loaded / e.total) * 100);
-          progressBar.style.width = pct + '%';
-          uploadStatus.textContent = 'Subiendo... ' + pct + '%';
-        }
-      });
+  xhr.upload.addEventListener('progress', function(e) {
+    if (e.lengthComputable) {
+      const pct = Math.round((e.loaded / e.total) * 100);
+      progressBar.style.width = pct + '%';
+      uploadStatus.textContent = 'Subiendo... ' + pct + '%';
+    }
+  });
 
-      // On complete
-      xhr.addEventListener('load', function() {
-        if (xhr.status === 204 || xhr.status === 201 || xhr.status === 200) {
-          // Build final S3 URL
-          uploadedS3Url = params.endpoint + params.fields.key;
-          progressBar.style.width = '100%';
-          progressBar.classList.remove('progress-bar-animated');
-          progressBar.classList.add('bg-success');
-          uploadStatus.textContent = '✓ Archivo listo';
-          btnPublicar.disabled = false;
-          btnText.textContent = 'Publicar';
-        } else {
-          console.error('S3 upload failed:', xhr.status, xhr.responseText);
-          uploadStatus.textContent = '✗ Error al subir. Intenta de nuevo.';
-          progressBar.classList.add('bg-danger');
-          btnPublicar.disabled = false;
-          btnText.textContent = 'Reintentar';
-        }
-      });
+  xhr.addEventListener('load', function() {
+    if (xhr.status === 204 || xhr.status === 201 || xhr.status === 200) {
+      uploadedS3Url = params.endpoint + '/' + params.bucket + '/' + params.object_key;
+      progressBar.style.width = '100%';
+      progressBar.classList.remove('progress-bar-animated');
+      progressBar.classList.add('bg-success');
+      uploadStatus.textContent = '✓ Archivo listo';
+      btnPublicar.disabled = false;
+      btnText.textContent = 'Publicar';
+    } else {
+      console.error('S3 upload failed:', xhr.status, xhr.responseText);
+      uploadStatus.textContent = '✗ Error al subir. Intenta de nuevo.';
+      progressBar.classList.add('bg-danger');
+      btnPublicar.disabled = false;
+      btnText.textContent = 'Reintentar';
+    }
+  });
 
-      xhr.addEventListener('error', function() {
-        uploadStatus.textContent = '✗ Error de conexión.';
-        progressBar.classList.add('bg-danger');
-        btnPublicar.disabled = false;
-        btnText.textContent = 'Reintentar';
-      });
+  xhr.addEventListener('error', function() {
+    uploadStatus.textContent = '✗ Error de conexión.';
+    progressBar.classList.add('bg-danger');
+  });
 
-      xhr.send(formData);
-    })
+  xhr.send(formData);
+})
     .catch(function(err) {
       console.error('Error:', err);
       uploadStatus.textContent = '✗ Error. Intenta de nuevo.';
