@@ -156,21 +156,46 @@ const CSRF_TOKEN = getCookie('csrftoken');
     btnPublicar.disabled = true;
     btnText.textContent = 'Subiendo archivo...';
 
-    // Get presigned URL from s3direct
+
     fetch('/s3direct/get_upload_params/', {
-      method: 'POST',
-      headers: {
+    method: 'POST',
+    headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'X-CSRFToken': CSRF_TOKEN,
-      },
-      body: new URLSearchParams({
+    },
+    body: new URLSearchParams({
         dest: 'multimedia_upload',
         name: file.name,
         type: file.type,
         size: file.size,
-      })
     })
-    .then(r => r.json())
+})
+.then(function(response) {
+    console.log('response status:', response.status);
+    return response.text();
+})
+.then(function(text) {
+    console.log('response body:', text);
+})
+.catch(function(err) {
+    console.log('fetch error:', err);
+});
+    // // Get presigned URL from s3direct
+    // fetch('/s3direct/get_upload_params/', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/x-www-form-urlencoded',
+    //     'X-CSRFToken': CSRF_TOKEN,
+    //   },
+    //   body: new URLSearchParams({
+    //     dest: 'multimedia_upload',
+    //     name: file.name,
+    //     type: file.type,
+    //     size: file.size,
+    //   })
+    // })
+    
+    // .then(r => r.json())
     // .then(params => {
     //   // Build FormData for S3 direct upload
     //   const formData = new FormData();
