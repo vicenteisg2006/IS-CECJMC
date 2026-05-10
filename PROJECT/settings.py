@@ -27,8 +27,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 AWS_STORAGE_BUCKET_NAME = 'relplus-bucket-116580070059-us-east-1-an'  # Replace with your bucket name
 AWS_S3_REGION_NAME = 'us-east-1'  # Replace with your region
+S3DIRECT_REGION = 'us-east-1'  # Replace with your region
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-
+AWS_S3_ENDPOINT_URL = f'https://s3.{AWS_S3_REGION_NAME}.amazonaws.com'
 LAMBDA_CALLBACK_SECRET = os.getenv('LAMBDA_CALLBACK_SECRET')
 
 S3DIRECT_DESTINATIONS = {
