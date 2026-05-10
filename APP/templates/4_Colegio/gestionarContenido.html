@@ -121,7 +121,22 @@
 
 {% block extra_js %}
 <script>
-  const CSRF_TOKEN = '{{ csrf_token }}';
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+const CSRF_TOKEN = getCookie('csrftoken');
   const POST_ID = '{{ post_id }}';  // pass this from your view
   let uploadedS3Url = null;
 
