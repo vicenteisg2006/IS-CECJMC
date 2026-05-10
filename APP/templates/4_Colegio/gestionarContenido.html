@@ -152,7 +152,9 @@
     progressWrap.classList.remove('d-none');
     btnPublicar.disabled = true;
     btnText.textContent = 'Subiendo archivo...';
+    uploadStatus.textContent = 'Subiendo...';
 
+    // Step 1: get presigned params from s3direct
     fetch('/s3direct/get_upload_params/', {
       method: 'POST',
       headers: {
@@ -167,18 +169,68 @@
       })
     })
     .then(function(response) {
-      console.log('response status:', response.status);
-      return response.text();
+      if (!response.ok) throw new Error('Error obteniendo parámetros de subida');
+      return response.json();
     })
-    .then(function(text) {
-      console.log('response body:', text);
+    .then(function(params) {
+      // Step 2: upload directly to S3
+      const formData = new FormData();
+      Object.keys(params.fields).forEach(function(k) {
+        formData.append(k, params.fields[k]);
+      });
+      formData.append('file', file);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', params.endpoint);
+
+      // Progress bar
+      xhr.upload.addEventListener('progress', function(e) {
+        if (e.lengthComputable) {
+          const pct = Math.round((e.loaded / e.total) * 100);
+          progressBar.style.width = pct + '%';
+          uploadStatus.textContent = 'Subiendo... ' + pct + '%';
+        }
+      });
+
+      // On complete
+      xhr.addEventListener('load', function() {
+        if (xhr.status === 204 || xhr.status === 201 || xhr.status === 200) {
+          // Build final S3 URL
+          uploadedS3Url = params.endpoint + params.fields.key;
+          progressBar.style.width = '100%';
+          progressBar.classList.remove('progress-bar-animated');
+          progressBar.classList.add('bg-success');
+          uploadStatus.textContent = '✓ Archivo listo';
+          btnPublicar.disabled = false;
+          btnText.textContent = 'Publicar';
+        } else {
+          console.error('S3 upload failed:', xhr.status, xhr.responseText);
+          uploadStatus.textContent = '✗ Error al subir. Intenta de nuevo.';
+          progressBar.classList.add('bg-danger');
+          btnPublicar.disabled = false;
+          btnText.textContent = 'Reintentar';
+        }
+      });
+
+      xhr.addEventListener('error', function() {
+        uploadStatus.textContent = '✗ Error de conexión.';
+        progressBar.classList.add('bg-danger');
+        btnPublicar.disabled = false;
+        btnText.textContent = 'Reintentar';
+      });
+
+      xhr.send(formData);
     })
     .catch(function(err) {
-      console.log('fetch error:', err);
+      console.error('Error:', err);
+      uploadStatus.textContent = '✗ Error. Intenta de nuevo.';
+      progressBar.classList.add('bg-danger');
+      btnPublicar.disabled = false;
+      btnText.textContent = 'Reintentar';
     });
+  });
 
-  }); // <-- this closes the change handler
-
+  // Publish button
   btnPublicar.addEventListener('click', function() {
     const titulo = document.getElementById('inputTitulo').value.trim();
     const descripcion = document.getElementById('inputDescripcion').value.trim();
@@ -195,17 +247,20 @@
     document.getElementById('formStep1').classList.add('d-none');
     document.getElementById('formStep2').classList.remove('d-none');
 
+    // Create ContenidoEducativo
     fetch("{% url 'gestionarContenidoEducativo' %}", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-CSRFToken': CSRF_TOKEN,
       },
-      body: JSON.stringify({ titulo, descripcion })
+      body: JSON.stringify({ titulo: titulo, descripcion: descripcion })
     })
-    .then(r => r.json())
-    .then(data => {
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
       if (!data.ok) throw new Error(data.error || 'Error al crear contenido');
+
+      // Register multimedia
       return fetch('/api/media/upload/', {
         method: 'POST',
         headers: {
@@ -218,11 +273,11 @@
         })
       });
     })
-    .then(r => r.json())
-    .then(data => {
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
       if (data.ok) window.location.reload();
     })
-    .catch(err => {
+    .catch(function(err) {
       console.error(err);
       alert('Ocurrió un error. Por favor intenta de nuevo.');
       document.getElementById('formStep1').classList.remove('d-none');
